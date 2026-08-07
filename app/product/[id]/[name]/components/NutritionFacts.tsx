@@ -1,63 +1,123 @@
 "use client";
+
 import React from "react";
-import type { Product } from '@/app/data/products';
+import type { Product } from "@/app/data/products";
+
+type DetailRow = { key: string; value: string };
+
+function fallbackFromDetails(details?: string[], emptyKey = "Details"): DetailRow[] {
+  return (Array.isArray(details) ? details : [])
+    .map((item) => {
+      const [key, ...rest] = String(item).split(":");
+      return {
+        key: String(key || emptyKey).trim(),
+        value: String(rest.join(":") || "-").trim() || "-",
+      };
+    })
+    .filter((item) => item.key || item.value);
+}
 
 export default function NutritionFacts({ product }: { product?: Product | null }) {
-  const description = product?.description ?? 'No description available.';
-  const ingredients = Array.isArray(product?.ingredients) && product.ingredients.length > 0
-    ? product.ingredients
-    : (Array.isArray(product?.details) ? product.details : [])
-      .map((item) => {
-        const [key, ...rest] = String(item).split(':');
-        return { key: String(key || 'Details').trim(), value: String(rest.join(':') || '—').trim() || '—' };
-      })
-      .filter((item) => item.key || item.value);
-  const nutritions = Array.isArray(product?.nutritions) && product.nutritions.length > 0
-    ? product.nutritions
-    : (Array.isArray(product?.details) ? product.details : [])
-      .map((item) => {
-        const [key, ...rest] = String(item).split(':');
-        return { key: String(key || 'Nutrient').trim(), value: String(rest.join(':') || '—').trim() || '—' };
-      })
-      .filter((item) => item.key || item.value);
-  const safeIngredients = ingredients.length > 0 ? ingredients : [{ key: 'Ingredients', value: 'Not available' }];
-  const safeNutritions = nutritions.length > 0 ? nutritions : [{ key: 'Nutrition', value: 'Not available' }];
+  const description = product?.description ?? "No description available.";
+  const ingredients =
+    Array.isArray(product?.ingredients) && product.ingredients.length > 0
+      ? product.ingredients
+      : fallbackFromDetails(product?.details, "Blend");
+  const kitchenNotes =
+    Array.isArray(product?.nutritions) && product.nutritions.length > 0
+      ? product.nutritions
+      : fallbackFromDetails(product?.details, "Kitchen note");
+  const specifications =
+    Array.isArray(product?.specifications) && product.specifications.length > 0
+      ? product.specifications
+      : [{ key: "Storage", value: "Refer to product pack" }];
 
   return (
-    <section className="mt-24 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center pb-8 border-b border-outline-variant/20">
+    <section className="mt-12 grid grid-cols-1 gap-8 border-b border-outline-variant/20 pb-8 lg:mt-16 xl:grid-cols-[1.18fr_0.82fr]">
       <div className="space-y-8">
-        <h3 className="font-headline text-4xl font-bold text-primary">Ingredients & Purity</h3>
-        <p className="text-on-surface leading-relaxed text-lg font-body">
+        <div className="space-y-3">
+          <p className="text-xs font-bold uppercase tracking-[0.28em] text-secondary">
+            Product Profile
+          </p>
+          <h3 className="font-headline text-4xl font-bold text-primary">
+            Blend, Purity & Kitchen Notes
+          </h3>
+        </div>
+
+        <p className="text-lg leading-relaxed text-on-surface font-body">
           {description}
         </p>
-        <div className="space-y-4">
-          {safeIngredients.map((d, i) => (
-            <div key={i} className="flex items-center justify-between py-4 border-b border-outline-variant/30">
-              <span className="font-bold text-on-surface font-body">{d.key}</span>
-              <span className="text-secondary font-headline italic font-bold">{d.value || '—'}</span>
+
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="rounded-[2rem] border border-outline-variant/20 bg-surface-container-low p-6">
+            <h4 className="font-headline text-2xl font-bold text-primary">
+              Blend & Ingredients
+            </h4>
+            <div className="mt-5 space-y-4">
+              {ingredients.map((item, index) => (
+                <div
+                  key={`${item.key}-${index}`}
+                  className="flex items-center justify-between border-b border-outline-variant/30 py-3"
+                >
+                  <span className="font-body font-bold text-on-surface">{item.key}</span>
+                  <span className="max-w-[55%] text-right font-headline font-bold italic text-secondary">
+                    {item.value || "-"}
+                  </span>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+
+          <div className="rounded-[2rem] border border-outline-variant/20 bg-surface-container-low p-6">
+            <h4 className="font-headline text-2xl font-bold text-primary">
+              Kitchen Notes
+            </h4>
+            <div className="mt-5 space-y-4">
+              {kitchenNotes.map((item, index) => (
+                <div
+                  key={`${item.key}-${index}`}
+                  className="flex justify-between border-b border-outline-variant/30 pb-3"
+                >
+                  <span className="font-bold text-on-surface">{item.key}</span>
+                  <span className="max-w-[55%] text-right">{item.value || "-"}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-        <div className="bg-primary/5 p-6 rounded-2xl border-l-[4px] border-primary flex items-start gap-4">
-          <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>format_quote</span>
-          <span className="italic text-primary font-body text-sm leading-relaxed">
-            "Our traditional clarification process uses gentle techniques to preserve the product's nutritional profile."
+
+        <div className="flex items-start gap-4 rounded-2xl border-l-[4px] border-primary bg-primary/5 p-6">
+          <span
+            className="material-symbols-outlined text-primary"
+            style={{ fontVariationSettings: "'FILL' 1" }}
+          >
+            format_quote
+          </span>
+          <span className="text-sm italic leading-relaxed text-primary font-body">
+            "Every Gram Ansh product is described around real kitchen use, cleaner inputs, and everyday pantry trust."
           </span>
         </div>
       </div>
-      
-      <div className="bg-surface-container-highest p-8 rounded-[2.5rem] shadow-sm">
-        <h4 className="font-headline text-2xl font-bold text-primary mb-6">Nutrition Facts</h4>
-        <div className="text-xs text-on-surface-variant uppercase tracking-widest mb-4 font-bold">Per 100g Serving</div>
-        <div className="space-y-4 font-label text-sm">
-          {safeNutritions.slice(0, 5).map((d, idx) => (
-            <div key={idx} className="flex justify-between border-b border-outline-variant/40 pb-3">
-              <span className="font-bold text-on-surface">{d.key}</span>
-              <span>{d.value || '—'}</span>
+
+      <div className="rounded-[2.5rem] bg-surface-container-highest p-8 shadow-sm">
+        <h4 className="mb-2 font-headline text-2xl font-bold text-primary">
+          Storage & Shelf Life
+        </h4>
+        <div className="mb-6 text-xs font-bold uppercase tracking-widest text-on-surface-variant">
+          Packed for everyday use
+        </div>
+        <div className="space-y-4 text-sm font-label">
+          {specifications.map((item, index) => (
+            <div
+              key={`${item.key}-${index}`}
+              className="flex justify-between border-b border-outline-variant/40 pb-3"
+            >
+              <span className="font-bold text-on-surface">{item.key}</span>
+              <span className="max-w-[55%] text-right">{item.value || "-"}</span>
             </div>
           ))}
-          <div className="mt-6 text-[10px] text-on-surface-variant italic font-body">
-            *Daily Value (DV) based on a 2000 calorie diet.
+          <div className="mt-6 text-[10px] italic text-on-surface-variant font-body">
+            Product-specific storage, shelf life, and best-use guidance appears here when provided from admin.
           </div>
         </div>
       </div>

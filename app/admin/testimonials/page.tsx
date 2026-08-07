@@ -36,7 +36,7 @@ const emptyForm: FormState = {
   isActive: true,
 };
 
-const HOMEPAGE_PUBLIC_CACHE_KEY = "amila_homepage_public_cache_v1";
+const HOMEPAGE_PUBLIC_CACHE_KEY = "gramansh_homepage_public_cache_v1";
 const TESTIMONIALS_STORAGE_KEY = "sr_testimonials";
 
 function clearPublicTestimonialCaches() {

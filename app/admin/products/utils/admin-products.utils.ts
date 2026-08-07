@@ -37,12 +37,14 @@ export type ProductItem = {
   }>;
   ingredients?: Array<{ key: string; value: string }>;
   nutritions?: Array<{ key: string; value: string }>;
-  key_highlights?: string[];
+  key_highlights?: Array<{ key: string; value: string }>;
   specifications?: Array<{ key: string; value: string }>;
 };
 
 export type IngredientRow = { key: string; value: string };
 export type NutritionRow = { key: string; value: string };
+export type HighlightRow = { key: string; value: string };
+export type SpecificationRow = { key: string; value: string };
 export type WeightUnit = 'GM' | 'KG';
 
 export type VariantRow = {
@@ -58,8 +60,10 @@ export type VariantRow = {
 
 export const WEIGHT_UNIT_OPTIONS: WeightUnit[] = ['GM', 'KG'];
 export const DESCRIPTION_MAX_LENGTH = 1200;
-export const INGREDIENTS_COUNT = 3;
+export const INGREDIENTS_COUNT = 4;
 export const NUTRITIONS_COUNT = 5;
+export const HIGHLIGHTS_COUNT = 4;
+export const SPECIFICATIONS_COUNT = 4;
 
 export const createEmptyVariant = (): VariantRow => ({
   weight: '',
@@ -74,6 +78,8 @@ export const createEmptyVariant = (): VariantRow => ({
 
 export const createEmptyIngredient = (): IngredientRow => ({ key: '', value: '' });
 export const createEmptyNutrition = (): NutritionRow => ({ key: '', value: '' });
+export const createEmptyHighlight = (): HighlightRow => ({ key: '', value: '' });
+export const createEmptySpecification = (): SpecificationRow => ({ key: '', value: '' });
 
 export const categoryIdOf = (node: CategoryNode) => String(node._id || node.id || '');
 

@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { createProductHref } from "@/app/data/products";
 import { fetchBackendProducts } from "@/app/lib/backendProducts";
 
-const SITE_URL = "https://amilagold.com";
+const SITE_URL = "https://gramansh.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();

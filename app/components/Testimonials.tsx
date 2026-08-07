@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, MessageCircle, Star } from "lucide-react";
 import {
   fetchPublicTestimonialsData,
   type PublicTestimonial,
@@ -25,22 +26,12 @@ function TestimonialsSection({
   initialTestimonials?: PublicTestimonial[];
   managed?: boolean;
 }) {
-  const [testimonials, setTestimonials] = useState<TestimonialItem[]>(
-    initialTestimonials.length ? initialTestimonials : FALLBACK_TESTIMONIALS,
-  );
-  const [isLoading, setIsLoading] = useState(initialTestimonials.length === 0);
-  const trackRef = useRef<HTMLDivElement | null>(null);
-  const [canScrollPrev, setCanScrollPrev] = useState(false);
-  const [canScrollNext, setCanScrollNext] = useState(false);
-
   const getCachedTestimonials = (): TestimonialItem[] | null => {
     if (typeof window === "undefined") return null;
 
     try {
       const cached = window.localStorage.getItem(TESTIMONIALS_STORAGE_KEY);
-
       if (!cached) return null;
-
       const data = JSON.parse(cached);
 
       if (
@@ -56,6 +47,16 @@ function TestimonialsSection({
     }
   };
 
+  const [fetchedTestimonials, setFetchedTestimonials] = useState<
+    TestimonialItem[] | null
+  >(() => getCachedTestimonials());
+  const [isLoading, setIsLoading] = useState(
+    initialTestimonials.length === 0 && !managed && getCachedTestimonials() === null,
+  );
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(false);
+
   const saveToCache = (items: TestimonialItem[]) => {
     if (typeof window === "undefined") return;
 
@@ -68,29 +69,14 @@ function TestimonialsSection({
         }),
       );
     } catch {
-      /* ignore */
+      // ignore cache failures
     }
   };
 
   useEffect(() => {
-    if (initialTestimonials.length > 0) {
-      setTestimonials(initialTestimonials);
-      setIsLoading(false);
-    } else if (managed) {
-      setTestimonials(FALLBACK_TESTIMONIALS);
-      setIsLoading(false);
-    }
-  }, [initialTestimonials, managed]);
-
-  useEffect(() => {
     if (managed) return;
 
-    const cached = getCachedTestimonials();
-
-    if (cached && cached.length > 0) {
-      setTestimonials(cached);
-      setIsLoading(false);
-    }
+    const cached = fetchedTestimonials;
 
     fetchPublicTestimonialsData()
       .then((rowsUnknown) => {
@@ -104,41 +90,49 @@ function TestimonialsSection({
         };
 
         const rows = rowsUnknown as RawRow[];
-
         const mappedTestimonials = rows.map((row) => ({
           id: row.id,
           quote: row.quote,
           name: row.name,
-          role: row.role || "",
+          role: row.role || "Gram Ansh customer",
         }));
 
-        setTestimonials(mappedTestimonials);
+        setFetchedTestimonials(mappedTestimonials);
         saveToCache(mappedTestimonials);
       })
       .catch(() => {
         if (!cached || cached.length === 0) {
-          setTestimonials(FALLBACK_TESTIMONIALS);
+          setFetchedTestimonials(FALLBACK_TESTIMONIALS);
         }
       })
       .finally(() => {
         setIsLoading(false);
       });
-  }, [managed]);
+  }, [fetchedTestimonials, managed]);
+
+  const testimonials =
+    initialTestimonials.length > 0
+      ? initialTestimonials.map((item) => ({
+          id: item.id,
+          quote: item.quote,
+          name: item.name,
+          role: item.role || "Gram Ansh customer",
+        }))
+      : managed
+        ? FALLBACK_TESTIMONIALS
+        : (fetchedTestimonials ?? FALLBACK_TESTIMONIALS);
 
   const updateScrollControls = () => {
     const track = trackRef.current;
-
     if (!track) return;
 
     const maxScroll = Math.max(0, track.scrollWidth - track.clientWidth - 2);
-
     setCanScrollPrev(track.scrollLeft > 2);
     setCanScrollNext(track.scrollLeft < maxScroll);
   };
 
   useEffect(() => {
     const track = trackRef.current;
-
     if (!track) return;
 
     updateScrollControls();
@@ -157,7 +151,6 @@ function TestimonialsSection({
 
   const scrollTrack = (direction: "prev" | "next") => {
     const track = trackRef.current;
-
     if (!track) return;
 
     const card = track.querySelector<HTMLElement>("[data-testimonial-card]");
@@ -177,191 +170,113 @@ function TestimonialsSection({
   const controlsVisible = canScrollPrev || canScrollNext;
 
   return (
-    <section className="testimonials-section overflow-hidden bg-surface py-8 md:py-10 lg:py-14">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-12">
-        <div className="mb-6 flex flex-col gap-5 md:mb-8 md:flex-row md:items-end md:justify-between">
-          <div className="max-w-2xl">
-            <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-secondary/80">
-              Customer words
-            </p>
+    <section className="relative overflow-hidden bg-[linear-gradient(180deg,#f7f0e1_0%,#fffdf8_100%)] py-10 lg:py-20">
+      <div className="pointer-events-none absolute left-0 top-20 h-64 w-64 rounded-full bg-[#d79d44]/10 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-0 right-0 h-72 w-72 rounded-full bg-[#2b5a23]/8 blur-3xl" />
 
-            <h2 className="font-headline text-3xl leading-tight text-primary md:text-4xl lg:text-[42px]">
-              Shared Stories from the{" "}
-              <span className="italic text-secondary">Modern Agrarian</span>{" "}
-              Table
+      <div className="container relative mx-auto px-4 lg:px-8">
+        <div className="mb-8 flex flex-col gap-5 lg:mb-12 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#dfd1b9] bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#8c5f22]">
+              <MessageCircle className="h-3.5 w-3.5 text-[#2b5a23]" strokeWidth={2.4} />
+              Community voices
+            </div>
+
+            <h2 className="text-3xl font-black tracking-[-0.05em] text-[#24461e] md:text-5xl">
+              Families choosing <span className="text-[#8c5f22]">Gram Ansh</span>
             </h2>
+
+            <p className="mt-3 max-w-xl text-sm leading-7 text-[#6f5a44] md:text-base">
+              Real feedback from customers who value natural ingredients,
+              traditional flavour, and kitchen trust.
+            </p>
           </div>
 
           {controlsVisible ? (
-            <div className="hidden gap-3 md:flex md:justify-end">
+            <div className="flex gap-3">
               <button
                 onClick={() => scrollTrack("prev")}
                 disabled={!canScrollPrev}
-                className="grid h-11 w-11 place-items-center rounded-full border border-primary/20 text-primary transition-all hover:bg-primary/5 disabled:cursor-not-allowed disabled:opacity-35"
+                className="grid h-11 w-11 place-items-center rounded-full border border-[#d9ccb5] bg-white text-[#24461e] shadow-[0_10px_24px_rgba(92,72,31,0.08)] transition hover:border-[#b87922] hover:text-[#8c5f22] disabled:cursor-not-allowed disabled:opacity-35"
                 aria-label="Previous testimonial"
                 type="button"
               >
-                <svg
-                  width="22"
-                  height="22"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="m15 18-6-6 6-6" />
-                </svg>
+                <ChevronLeft className="h-5 w-5" strokeWidth={2.4} />
               </button>
-
               <button
                 onClick={() => scrollTrack("next")}
                 disabled={!canScrollNext}
-                className="grid h-11 w-11 place-items-center rounded-full border border-primary/20 text-primary transition-all hover:bg-primary/5 disabled:cursor-not-allowed disabled:opacity-35"
+                className="grid h-11 w-11 place-items-center rounded-full border border-[#d9ccb5] bg-white text-[#24461e] shadow-[0_10px_24px_rgba(92,72,31,0.08)] transition hover:border-[#b87922] hover:text-[#8c5f22] disabled:cursor-not-allowed disabled:opacity-35"
                 aria-label="Next testimonial"
                 type="button"
               >
-                <svg
-                  width="22"
-                  height="22"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="m9 18 6-6-6-6" />
-                </svg>
+                <ChevronRight className="h-5 w-5" strokeWidth={2.4} />
               </button>
             </div>
           ) : null}
         </div>
 
-        {controlsVisible ? (
-          <div className="mb-4 flex justify-end gap-3 md:hidden">
-            <button
-              onClick={() => scrollTrack("prev")}
-              disabled={!canScrollPrev}
-              className="grid h-10 w-10 place-items-center rounded-full border border-primary/20 text-primary transition-all hover:bg-primary/5 disabled:cursor-not-allowed disabled:opacity-35"
-              aria-label="Previous testimonial"
-              type="button"
-            >
-              <svg
-                width="21"
-                height="21"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="m15 18-6-6 6-6" />
-              </svg>
-            </button>
-
-            <button
-              onClick={() => scrollTrack("next")}
-              disabled={!canScrollNext}
-              className="grid h-10 w-10 place-items-center rounded-full border border-primary/20 text-primary transition-all hover:bg-primary/5 disabled:cursor-not-allowed disabled:opacity-35"
-              aria-label="Next testimonial"
-              type="button"
-            >
-              <svg
-                width="21"
-                height="21"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="m9 18 6-6-6-6" />
-              </svg>
-            </button>
-          </div>
-        ) : null}
-
         <div className="relative overflow-hidden">
           {isLoading ? (
             <TestimonialsGridSkeleton count={3} />
           ) : testimonials.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-[18px] border border-primary/10 bg-surface-container-low px-5 py-12 text-center md:py-16">
-              <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-surface-container-highest">
-                <span className="material-symbols-outlined text-3xl text-on-surface-variant/40">
-                  chat_bubble_outline
-                </span>
+            <div className="flex flex-col items-center justify-center rounded-[28px] border border-[#e6d7c1] bg-white px-5 py-14 text-center">
+              <div className="mb-5 grid h-16 w-16 place-items-center rounded-full bg-[#f5efe4] text-[#8c5f22]">
+                <MessageCircle className="h-8 w-8" strokeWidth={2.1} />
               </div>
-
-              <h3 className="font-headline mb-2 text-2xl text-primary md:text-3xl">
-                No Testimonials Yet
+              <h3 className="text-2xl font-black tracking-[-0.03em] text-[#24461e] md:text-3xl">
+                No testimonials yet
               </h3>
-
-              <p className="mx-auto max-w-md text-sm leading-6 text-on-surface-variant/70">
-                Be the first to share your experience with our community. Your
-                feedback helps others discover the authentic taste of tradition.
+              <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-[#7b6a56]">
+                Be the first to share your experience with Gram Ansh and help
+                others discover the taste of natural pantry essentials.
               </p>
             </div>
           ) : (
             <div
               ref={trackRef}
-              className="testimonials-track flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-1 md:gap-5 lg:gap-6"
+              className="testimonials-track flex gap-4 overflow-x-auto scroll-smooth pb-2 lg:gap-6"
             >
               {testimonials.map((t, index) => (
-                <div
+                <article
                   key={t.id || `${t.name}-${index}`}
                   data-testimonial-card
-                  className="testimonial-card flex min-h-[270px] shrink-0 snap-start flex-col justify-between rounded-[22px] bg-surface-container-low p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-sm sm:min-h-[250px] sm:[flex:0_0_72%] md:min-h-[265px] md:[flex:0_0_44%] md:p-6 lg:min-h-[285px] lg:[flex:0_0_31.5%]"
+                  className="flex min-h-[280px] shrink-0 flex-col justify-between rounded-[30px] border border-[#eadfcd] bg-white p-6 shadow-[0_14px_35px_rgba(87,67,25,0.05)] sm:min-h-[270px] sm:[flex:0_0_78%] md:[flex:0_0_48%] lg:min-h-[300px] lg:[flex:0_0_32%]"
                 >
-                  <div className="min-w-0">
-                    <svg
-                      className="mb-4 h-8 w-8 text-secondary/30 md:mb-5 md:h-9 md:w-9"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        d="M14.017 21L14.017 18C14.017 16.8954 14.9124 16 16.017 16H19.017C19.5693 16 20.017 15.5523 20.017 15V9C20.017 8.44772 19.5693 8 19.017 8H15.017C14.4647 8 14.017 8.44772 14.017 9V11"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        fill="none"
-                      />
-                      <path
-                        d="M3.983 21L3.983 18C3.983 16.8954 4.87843 16 5.983 16H8.983C9.53528 16 9.983 15.5523 9.983 15V9C9.983 8.44772 9.53528 8 8.983 8H4.983C4.43071 8 3.983 8.44772 3.983 9V11"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        fill="none"
-                      />
-                    </svg>
+                  <div>
+                    <div className="mb-5 flex items-center gap-1.5 text-[#d79d44]">
+                      {[0, 1, 2, 3, 4].map((star) => (
+                        <Star
+                          key={star}
+                          className="h-4 w-4 fill-current"
+                          strokeWidth={1.8}
+                        />
+                      ))}
+                    </div>
 
-                    <p className="testimonial-quote font-headline line-clamp-5 text-base italic leading-relaxed text-on-surface md:text-lg">
+                    <p className="text-base italic leading-8 text-[#3c3228] md:text-lg">
                       &ldquo;{t.quote}&rdquo;
                     </p>
                   </div>
 
-                  <div className="mt-6 flex items-center gap-3 border-t border-primary/10 pt-4">
+                  <div className="mt-8 flex items-center gap-3 border-t border-[#efe4d4] pt-4">
                     <div
-                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-surface-container-highest font-headline text-lg font-bold text-primary shadow-sm"
+                      className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-[linear-gradient(135deg,#2b5a23_0%,#4b742f_100%)] text-lg font-black text-white shadow-[0_10px_24px_rgba(43,90,35,0.2)]"
                       aria-hidden="true"
                     >
                       {t.name.trim().charAt(0).toLocaleUpperCase() || "?"}
                     </div>
 
                     <div className="min-w-0">
-                      <h5 className="truncate text-sm font-bold text-on-surface md:text-base">
+                      <h5 className="truncate text-sm font-black text-[#24461e] md:text-base">
                         {t.name}
                       </h5>
-
-                      {t.role ? (
-                        <span className="mt-0.5 block truncate text-[11px] font-semibold uppercase tracking-widest text-on-surface-variant">
-                          {t.role}
-                        </span>
-                      ) : null}
+                      <span className="mt-0.5 block truncate text-[11px] font-bold uppercase tracking-[0.16em] text-[#8c5f22]">
+                        {t.role || "Gram Ansh family"}
+                      </span>
                     </div>
                   </div>
-                </div>
+                </article>
               ))}
             </div>
           )}
@@ -381,33 +296,9 @@ function TestimonialsSection({
           height: 0;
         }
 
-        .testimonial-card {
-          transform: translateZ(0);
-        }
-
         @media (max-width: 639px) {
-          .testimonial-card {
-            flex: 0 0 86%;
-          }
-        }
-
-        @media (min-width: 1024px) {
-          .testimonial-quote {
-            display: -webkit-box;
-            -webkit-line-clamp: 5;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-          }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .testimonial-card {
-            transition: none !important;
-            transform: none !important;
-          }
-
-          .testimonials-track {
-            scroll-behavior: auto !important;
+          [data-testimonial-card] {
+            flex: 0 0 88%;
           }
         }
       `}</style>

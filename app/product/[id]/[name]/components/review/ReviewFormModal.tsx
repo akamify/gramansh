@@ -1,7 +1,6 @@
 'use client';
 
 import { createPortal } from 'react-dom';
-import { useState, useEffect } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import type { ReviewFormState } from '../types';
 
@@ -22,28 +21,11 @@ export default function ReviewFormModal({
     onClose,
     onSubmit,
 }: ReviewFormModalProps) {
-    const [render, setRender] = useState(show);
-    const [animate, setAnimate] = useState(false);
-
-    useEffect(() => {
-        if (show) {
-            setRender(true);
-            const timer = requestAnimationFrame(() => {
-                setAnimate(true);
-            });
-            return () => cancelAnimationFrame(timer);
-        } else {
-            setAnimate(false);
-            const timer = setTimeout(() => setRender(false), 400); // 400ms matching transition duration
-            return () => clearTimeout(timer);
-        }
-    }, [show]);
-
-    if (!render) return null;
+    if (!show) return null;
     if (typeof document === 'undefined') return null;
 
     return createPortal(
-        <div className={`fixed inset-0 z-[110] overflow-hidden transition-all duration-400 ease-[cubic-bezier(0.2,0.8,0.2,1)] ${animate ? 'opacity-100 visible' : 'opacity-0 invisible'}`}>
+        <div className="fixed inset-0 z-[110] overflow-hidden opacity-100 visible transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]">
             <button
                 type="button"
                 aria-label="Close review modal"
@@ -60,11 +42,11 @@ export default function ReviewFormModal({
                 data-lenis-prevent="true"
             >
                 <div className="min-h-full flex items-start md:items-center justify-center pb-12 sm:px-4 md:py-6">
-                    <div className={`relative w-full max-w-2xl bg-surface sm:rounded-xl p-8 md:p-12 shadow-2xl transition-all duration-400 ease-[cubic-bezier(0.2,0.8,0.2,1)] transform ${animate ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-12 scale-95 opacity-0'}`}>
+                    <div className="relative w-full max-w-2xl bg-surface sm:rounded-xl p-8 md:p-12 shadow-2xl transition-all duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] transform translate-y-0 scale-100 opacity-100">
                         <div className="flex items-start justify-between gap-4 mb-8">
                             <div>
                                 <h3 className="font-headline text-3xl md:text-4xl text-primary font-medium">Write a Review</h3>
-                                <p className="font-label text-xs uppercase tracking-widest text-on-surface-variant mt-2">Share your experience with Amila Gold</p>
+                                <p className="font-label text-xs uppercase tracking-widest text-on-surface-variant mt-2">Share your experience with Gram Ansh</p>
                             </div>
                             <button
                                 type="button"

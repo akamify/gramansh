@@ -36,10 +36,10 @@ const StatCard = ({ label, val, trend, trendValue, reversed, delay }: any) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
-      className="relative group bg-white border border-slate-200 p-6 rounded-2xl shadow-sm hover:shadow-xl hover:border-red-500/50 transition-all duration-300 overflow-hidden"
+      className="relative overflow-hidden rounded-[24px] border border-[#dccaa7] bg-[linear-gradient(180deg,#fffdf8_0%,#f8f1e3_100%)] p-6 shadow-[0_18px_36px_rgba(87,64,26,0.08)] transition-all duration-300 hover:border-[#b28a49] hover:shadow-[0_22px_42px_rgba(87,64,26,0.12)] group"
     >
       <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-        <Zap size={40} className="text-red-600" />
+        <Zap size={40} className="text-[#9a6a2f]" />
       </div>
       
       <span className="block font-sans text-[10px] tracking-[0.2em] font-bold text-slate-500 uppercase mb-4">
@@ -47,7 +47,7 @@ const StatCard = ({ label, val, trend, trendValue, reversed, delay }: any) => {
       </span>
       
       <div className="flex flex-col gap-1">
-        <span className="text-3xl font-bold tracking-tight text-slate-900">
+        <span className="text-3xl font-bold tracking-tight text-[#234a22]">
           {val}
         </span>
         
@@ -111,8 +111,8 @@ export default function AdminAnalytics() {
   if (isLoading) return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
       <div className="relative">
-        <div className="w-12 h-12 border-4 border-red-500/20 border-t-red-600 rounded-full animate-spin"></div>
-        <div className="absolute inset-0 blur-lg bg-red-500/20 animate-pulse"></div>
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#c6ad76]/25 border-t-[#234a22]"></div>
+        <div className="absolute inset-0 animate-pulse blur-lg bg-[#c6ad76]/20"></div>
       </div>
       <p className="font-sans text-xs tracking-[0.3em] font-bold text-slate-500 animate-pulse">ESTABLISHING UPLINK</p>
     </div>
@@ -121,29 +121,29 @@ export default function AdminAnalytics() {
   return (
     <div className="max-w-[1600px] mx-auto p-4 md:p-8 space-y-8">
       {/* Header */}
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-slate-200">
+      <header className="flex flex-col justify-between gap-6 border-b border-[#dbcbaa] pb-6 md:flex-row md:items-end">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="h-[2px] w-8 bg-red-600"></span>
-            <span className="text-[10px] font-black tracking-[0.4em] text-red-600 uppercase">System Intelligence</span>
+            <span className="h-[2px] w-8 bg-[#9a6a2f]"></span>
+            <span className="text-[10px] font-black tracking-[0.4em] text-[#9a6a2f] uppercase">Gram Ansh Intelligence</span>
           </div>
-          <h2 className="text-4xl md:text-6xl font-black tracking-tighter text-slate-900 uppercase italic">
-            Kinetic<span className="text-red-600">.</span>Insight
+          <h2 className="text-4xl font-black tracking-tighter uppercase italic text-[#234a22] md:text-6xl">
+            Market<span className="text-[#9a6a2f]">.</span>Insight
           </h2>
         </div>
         
-        <div className="flex items-center gap-4 bg-slate-100 p-1.5 rounded-full self-start md:self-auto">
+        <div className="flex items-center gap-4 self-start rounded-full bg-[#f3e8d5] p-1.5 md:self-auto">
             <button onClick={load} className="p-2 hover:bg-white rounded-full transition-all shadow-sm group">
                 <RefreshCcw size={18} className={`text-slate-600 group-active:rotate-180 transition-transform duration-500`} />
             </button>
             <div className="px-4 py-1.5 bg-white rounded-full shadow-sm">
-                <span className="text-[10px] font-bold tracking-widest text-slate-500 uppercase">Q4 Live Stream</span>
+                <span className="text-[10px] font-bold tracking-widest text-[#7b684d] uppercase">Daily Live Stream</span>
             </div>
         </div>
       </header>
 
       {error && (
-        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-rose-50 border border-rose-200 p-4 rounded-xl flex items-center justify-between">
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex items-center justify-between rounded-2xl border border-[#b35a4a]/20 bg-[#fff1ee] p-4">
           <div className="flex items-center gap-3 text-rose-700">
             <AlertCircle size={20} />
             <p className="text-sm font-medium">{error}</p>
@@ -161,11 +161,11 @@ export default function AdminAnalytics() {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
         {/* Regional Performance */}
-        <div className="xl:col-span-2 bg-white border border-slate-200 rounded-3xl p-6 md:p-8">
+        <div className="xl:col-span-2 rounded-[28px] border border-[#dccaa7] bg-[linear-gradient(180deg,#fffdf8_0%,#f8f1e3_100%)] p-6 md:p-8">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
-               <div className="p-2 bg-slate-100 rounded-lg">
-                 <Globe size={20} className="text-red-600" />
+               <div className="rounded-xl bg-[#efe1c2] p-2">
+                 <Globe size={20} className="text-[#9a6a2f]" />
                </div>
                <h3 className="text-xl font-bold tracking-tight">Regional Distribution</h3>
             </div>
@@ -175,7 +175,7 @@ export default function AdminAnalytics() {
             {(data?.regional || [{ region: 'Global', growthPercent: 0 }]).map((r, i) => (
               <div key={i} className="group">
                 <div className="flex justify-between items-end mb-2">
-                  <span className="text-xs font-bold text-slate-500 uppercase tracking-widest group-hover:text-red-600 transition-colors">{r.region}</span>
+                  <span className="text-xs font-bold uppercase tracking-widest text-slate-500 transition-colors group-hover:text-[#9a6a2f]">{r.region}</span>
                   <span className={`text-xs font-bold ${r.growthPercent >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
                     {formatTrend(r.growthPercent)} GROWTH
                   </span>
@@ -185,7 +185,7 @@ export default function AdminAnalytics() {
                     initial={{ width: 0 }}
                     animate={{ width: `${clamp(Math.abs(r.growthPercent) * 2)}%` }}
                     transition={{ duration: 1, delay: 0.5 + (i * 0.1) }}
-                    className="h-full bg-gradient-to-r from-red-600 to-red-400 rounded-full"
+                    className="h-full rounded-full bg-gradient-to-r from-[#234a22] to-[#c79a49]"
                   />
                 </div>
               </div>
@@ -194,8 +194,8 @@ export default function AdminAnalytics() {
         </div>
 
         {/* Circular Gauge */}
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 flex flex-col items-center justify-center relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-red-500 to-transparent opacity-50"></div>
+        <div className="relative flex flex-col items-center justify-center overflow-hidden rounded-[28px] border border-[#224622] bg-[linear-gradient(180deg,#173217_0%,#234a22_55%,#3f5f29_100%)] p-8">
+          <div className="absolute left-0 top-0 h-1 w-full bg-gradient-to-r from-transparent via-[#d4b06b] to-transparent opacity-50"></div>
           
           <h3 className="text-[10px] font-black tracking-[0.4em] text-slate-500 uppercase mb-8">Performance Index</h3>
           
@@ -209,7 +209,7 @@ export default function AdminAnalytics() {
                 initial={{ strokeDashoffset: 283 }}
                 animate={{ strokeDashoffset: 283 - (283 * performanceIndex) / 100 }}
                 transition={{ duration: 1.5, ease: "easeOut" }}
-                className="text-red-600"
+                className="text-[#d4b06b]"
                 strokeLinecap="round"
               />
             </svg>

@@ -1,261 +1,206 @@
-"use client";
-
-import React, { useEffect, useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
-import { peekCached, putCached } from "@/app/lib/clientCache";
-import { fetchPublicBannersData } from "@/app/lib/publicDataClient";
+import Link from "next/link";
+import {
+  ArrowRight,
+  BadgeCheck,
+  ShieldCheck,
+  ShoppingBag,
+} from "lucide-react";
 
-type HeroBanner = {
-  id: string;
-  title: string;
-  subtitle: string;
-  href: string;
-  img: string;
-};
+const HERO_IMAGE = "/banner2.png";
 
 type HeroSectionProps = {
-  initialBanners?: HeroBanner[];
+  initialBanners?: unknown[];
   managed?: boolean;
 };
 
-const FALLBACK_HERO: HeroBanner = {
-  id: "static-amila-hero",
-  title: "Pure Desi Jaggery, Crafted for Modern Homes",
-  subtitle: "Amila Gold",
-  href: "/shop",
-  img: "/fallback_banner.png",
-};
-
-const processRows = (rows: unknown[]): HeroBanner[] =>
-  rows
-    .map((value) => {
-      const row =
-        value && typeof value === "object"
-          ? (value as Record<string, unknown>)
-          : {};
-
-      const image = String(row.imageUrl || row.img || "").trim();
-
-      if (!image) return null;
-
-      return {
-        id: String(row.id || row._id || image),
-        title: String(row.title || ""),
-        subtitle: String(row.subtitle || ""),
-        href: String(row.targetUrl || row.href || "/shop"),
-        img: image,
-      };
-    })
-    .filter((item): item is HeroBanner => item !== null);
-
-export default function HeroSection({
-  initialBanners = [],
-  managed = false,
-}: HeroSectionProps) {
-  const [banners, setBanners] = useState<HeroBanner[]>(() => {
-    const cached = peekCached<unknown[]>("banners:public").data;
-
-    if (Array.isArray(cached) && cached.length) {
-      const processed = processRows(cached);
-      return processed.length ? processed : [FALLBACK_HERO];
-    }
-
-    return initialBanners.length ? initialBanners : [FALLBACK_HERO];
-  });
-
-  const [activeIndex, setActiveIndex] = useState(0);
-
-  useEffect(() => {
-    if (initialBanners.length > 0) {
-      setBanners(initialBanners);
-      setActiveIndex(0);
-      return;
-    }
-
-    if (managed) {
-      setBanners([FALLBACK_HERO]);
-      setActiveIndex(0);
-    }
-  }, [initialBanners, managed]);
-
-  useEffect(() => {
-    if (managed) return;
-
-    fetchPublicBannersData()
-      .then((rows) => {
-        putCached("banners:public", 5 * 60 * 1000, rows);
-        setBanners(rows.length ? rows : [FALLBACK_HERO]);
-        setActiveIndex(0);
-      })
-      .catch(() => {
-        if (initialBanners.length === 0) {
-          setBanners([FALLBACK_HERO]);
-          setActiveIndex(0);
-        }
-      });
-  }, [initialBanners.length, managed]);
-
-  useEffect(() => {
-    if (banners.length <= 1) return;
-
-    const timer = window.setInterval(() => {
-      setActiveIndex((current) =>
-        current === banners.length - 1 ? 0 : current + 1,
-      );
-    }, 6000);
-
-    return () => {
-      window.clearInterval(timer);
-    };
-  }, [banners.length]);
-
-  const handleSlide = (direction: "prev" | "next") => {
-    if (!banners.length) return;
-
-    setActiveIndex((current) => {
-      if (direction === "prev") {
-        return current === 0 ? banners.length - 1 : current - 1;
-      }
-
-      return current === banners.length - 1 ? 0 : current + 1;
-    });
-  };
-
+export default function HeroSection({}: HeroSectionProps) {
   return (
-    <section className="relative mt-16 h-[30vh] w-full overflow-hidden bg-stone-900 sm:h-[70vh] md:mt-20 md:h-[80vh]">
-      {banners.map((slide, index) => {
-        const isActive = activeIndex === index;
+    <section className="relative isolate overflow-hidden bg-[#f4efe4] px-1 py-1 sm:px-1.5 sm:py-1.5 lg:px-2 lg:py-2">
+      {/* Subtle page background decoration */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+      >
+        <div className="absolute -left-32 top-0 h-72 w-72 rounded-full bg-[#6f9754]/10 blur-3xl" />
+        <div className="absolute -right-28 bottom-0 h-80 w-80 rounded-full bg-[#bd853b]/10 blur-3xl" />
+      </div>
 
-        return (
-          <div
-            key={slide.id}
-            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-              isActive ? "z-10 opacity-100" : "z-0 opacity-0"
-            }`}
-          >
-            {slide.img ? (
-              <Image
-                src={slide.img}
-                alt={slide.title || slide.subtitle || "Banner"}
-                fill
-                priority={index === 0}
-                fetchPriority={index === 0 ? "high" : "auto"}
-                loading={index === 0 ? "eager" : "lazy"}
-                sizes="100vw"
-                quality={index === 0 ? 78 : 65}
-                className={`object-cover transition-transform duration-[10000ms] ease-linear ${
-                  isActive ? "scale-110" : "scale-100"
-                }`}
-              />
-            ) : (
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(245,158,11,0.38),transparent_32%),linear-gradient(135deg,#1c140b_0%,#4b2e11_48%,#111827_100%)]" />
-            )}
+      <div className="mx-auto w-full max-w-[1536px]">
+        <div className="group overflow-hidden rounded-[5px] border border-[#d8cdb8] bg-[#fffdf8] shadow-[0_18px_55px_rgba(50,39,18,0.12)]">
+          {/* Banner */}
+          <div className="relative aspect-[3/1] w-full overflow-hidden bg-[#e9e1d2]">
+            <Image
+              src={HERO_IMAGE}
+              alt="Gram Ansh cold pressed oils and natural masala products"
+              fill
+              priority
+              fetchPriority="high"
+              quality={100}
+              sizes="(max-width: 1536px) 100vw, 1536px"
+              className="object-cover object-center transition-transform duration-[1400ms] ease-out group-hover:scale-[1.006]"
+            />
 
-            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+            {/* Very light overlays only for a premium finish */}
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.08)_0%,transparent_28%,transparent_78%,rgba(19,45,18,0.08)_100%)]"
+            />
 
-            <div className="absolute inset-0 flex items-center justify-start pb-0">
-              <div className="container mx-auto px-6 sm:px-8 md:px-12">
-                <div className="flex min-h-[140px] max-w-2xl flex-col gap-3 sm:min-h-[200px] sm:gap-4 md:min-h-[240px] md:gap-6">
-                  {slide.subtitle ? (
-                    <span
-                      className={`inline-block transform text-[10px] font-bold uppercase tracking-[0.25em] text-amber-400 transition-all delay-300 duration-700 sm:text-xs md:text-sm ${
-                        isActive
-                          ? "translate-y-0 opacity-100"
-                          : "translate-y-4 opacity-0"
-                      }`}
-                    >
-                      {slide.subtitle}
-                    </span>
-                  ) : null}
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-y-0 left-0 w-[12%] bg-gradient-to-r from-white/10 to-transparent"
+            />
 
-                  {slide.title ? (
-                    <h1
-                      className={`text-2xl font-black leading-[1.05] text-white drop-shadow-xl transition-all delay-500 duration-1000 sm:text-6xl sm:leading-[1.1] md:text-7xl lg:text-6xl ${
-                        isActive
-                          ? "translate-y-0 opacity-100"
-                          : "translate-y-8 opacity-0"
-                      }`}
-                    >
-                      {slide.title}
-                    </h1>
-                  ) : null}
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-y-0 right-0 w-[12%] bg-gradient-to-l from-[#173716]/5 to-transparent"
+            />
+          </div>
 
-                  <div
-                    className={`mt-auto pt-4 transition-all delay-700 duration-700 sm:pt-6 ${
-                      isActive
-                        ? "translate-y-0 opacity-100"
-                        : "translate-y-4 opacity-0"
-                    }`}
-                  >
-                    <Link
-                      href={slide.href}
-                      className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full bg-amber-500 px-4 py-2 font-bold text-stone-900 shadow-[0_4px_20px_rgba(245,158,11,0.3)] transition-all hover:bg-amber-400 hover:shadow-[0_4px_25px_rgba(245,158,11,0.5)] active:scale-95 md:px-8 md:py-4"
-                    >
-                      <ShoppingBag
-                        size={18}
-                        className="md:h-5 md:w-5"
-                        strokeWidth={2.5}
-                      />
-                      <span className="text-xs uppercase tracking-wide sm:text-sm">
-                        Shop Collection
-                      </span>
-                    </Link>
-                  </div>
+          {/* Desktop bottom action strip */}
+          <div className="hidden min-h-[70px] items-center border-t border-[#dfd3be] bg-[linear-gradient(90deg,#fffdf8_0%,#f8f1e5_48%,#fffdf8_100%)] sm:grid sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:gap-4 sm:px-4 sm:py-2.5 lg:min-h-[76px] lg:gap-6 lg:px-6">
+            {/* Trusted household essentials */}
+            <div className="flex min-w-0 items-center justify-start">
+              <div className="inline-flex min-w-0 items-center gap-2.5">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#d7e1ce] bg-[#ebf2e5] text-[#2e652d]">
+                  <ShieldCheck
+                    className="h-[18px] w-[18px]"
+                    strokeWidth={2.4}
+                  />
+                </span>
+
+                <div className="min-w-0">
+                  <p className="truncate text-[9px] font-black uppercase tracking-[0.18em] text-[#8a5a2d] lg:text-[10px]">
+                    Trusted Household
+                  </p>
+
+                  <p className="mt-0.5 truncate text-[11px] font-extrabold text-[#284e24] lg:text-xs">
+                    Natural everyday essentials
+                  </p>
                 </div>
               </div>
             </div>
+
+            {/* Quality assured stays in the center */}
+            <div className="flex items-center justify-center">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#dce3d5] bg-white/75 px-3.5 py-2 shadow-[0_7px_20px_rgba(45,66,30,0.06)] backdrop-blur-sm lg:px-4">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#e8f1e2] text-[#2f652c]">
+                  <BadgeCheck
+                    className="h-4 w-4"
+                    strokeWidth={2.5}
+                  />
+                </span>
+
+                <span className="whitespace-nowrap text-[9px] font-black uppercase tracking-[0.17em] text-[#725033] lg:text-[10px]">
+                  Quality Assured
+                </span>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center justify-end gap-2.5">
+              <Link
+                href="/shop"
+                aria-label="Shop Gram Ansh products"
+                className="group/button inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[linear-gradient(135deg,#245b25_0%,#39752f_100%)] px-4 text-[10px] font-black uppercase tracking-[0.12em] text-white shadow-[0_10px_25px_rgba(35,84,34,0.25)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_32px_rgba(35,84,34,0.34)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3c7433] focus-visible:ring-offset-2 active:translate-y-0 lg:min-h-12 lg:px-5 lg:text-[11px]"
+              >
+                <ShoppingBag
+                  className="h-4 w-4 shrink-0"
+                  strokeWidth={2.5}
+                />
+
+                <span className="whitespace-nowrap">Shop Now</span>
+
+                <ArrowRight
+                  className="h-4 w-4 shrink-0 transition-transform duration-300 group-hover/button:translate-x-1"
+                  strokeWidth={2.6}
+                />
+              </Link>
+
+              <Link
+                href="/shop"
+                aria-label="Explore all Gram Ansh product ranges"
+                className="inline-flex min-h-11 items-center justify-center whitespace-nowrap rounded-full border border-[#d3c2a4] bg-white px-4 text-[9px] font-black uppercase tracking-[0.12em] text-[#704722] shadow-[0_8px_20px_rgba(63,48,23,0.08)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#af7c3c] hover:bg-[#fffdf8] hover:text-[#2d5d29] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b07b3d] focus-visible:ring-offset-2 active:translate-y-0 lg:min-h-12 lg:px-5 lg:text-[10px]"
+              >
+                Explore Range
+              </Link>
+            </div>
           </div>
-        );
-      })}
 
-      {/* Navigation capsule hidden completely on mobile */}
-      {banners.length > 1 ? (
-        <div className="absolute bottom-4 left-1/2 z-20 hidden -translate-x-1/2 items-center gap-6 rounded-full border border-white/20 bg-white/10 px-6 py-3 shadow-2xl backdrop-blur-md sm:flex md:bottom-5">
-          <button
-            onClick={() => handleSlide("prev")}
-            className="rounded-full p-1 text-white transition-colors hover:text-amber-400"
-            aria-label="Previous banner slide"
-            type="button"
-          >
-            <ChevronLeft size={24} />
-          </button>
+          {/* Mobile bottom content */}
+          <div className="border-t border-[#e2d6c2] bg-[linear-gradient(180deg,#fffdf9_0%,#f8f1e5_100%)] p-2.5 sm:hidden">
+            {/* Trust badges */}
+            <div className="grid grid-cols-2 gap-2">
+              <div className="flex min-w-0 items-center gap-2 rounded-xl border border-[#dfd5c3] bg-white/80 px-2.5 py-2 shadow-[0_5px_15px_rgba(56,43,20,0.05)]">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#eaf2e4] text-[#30642d]">
+                  <ShieldCheck
+                    className="h-4 w-4"
+                    strokeWidth={2.4}
+                  />
+                </span>
 
-          <div className="flex items-center gap-3">
-            {banners.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setActiveIndex(index)}
-                className={`relative h-1.5 rounded-full transition-all duration-500 ${
-                  activeIndex === index
-                    ? "w-8 bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.8)]"
-                    : "w-2 bg-white/40 hover:bg-white/70"
-                }`}
-                aria-label={`Show banner slide ${index + 1}`}
-                type="button"
-              />
-            ))}
+                <div className="min-w-0">
+                  <p className="truncate text-[7px] font-black uppercase tracking-[0.12em] text-[#98622d]">
+                    Trusted Household
+                  </p>
+
+                  <p className="mt-0.5 truncate text-[9px] font-extrabold text-[#31552a]">
+                    Essentials
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex min-w-0 items-center gap-2 rounded-xl border border-[#dfd5c3] bg-white/80 px-2.5 py-2 shadow-[0_5px_15px_rgba(56,43,20,0.05)]">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#eaf2e4] text-[#30642d]">
+                  <BadgeCheck
+                    className="h-4 w-4"
+                    strokeWidth={2.5}
+                  />
+                </span>
+
+                <div className="min-w-0">
+                  <p className="truncate text-[7px] font-black uppercase tracking-[0.12em] text-[#98622d]">
+                    Carefully Selected
+                  </p>
+
+                  <p className="mt-0.5 truncate text-[9px] font-extrabold text-[#31552a]">
+                    Quality Assured
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Mobile actions */}
+            <div className="mt-2.5 grid grid-cols-[1.15fr_1fr] gap-2">
+              <Link
+                href="/shop"
+                aria-label="Shop Gram Ansh products"
+                className="group/button inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl bg-[linear-gradient(135deg,#245b25_0%,#3e7933_100%)] px-3 text-[9px] font-black uppercase tracking-[0.11em] text-white shadow-[0_10px_22px_rgba(35,84,34,0.25)] transition-transform active:scale-[0.98]"
+              >
+                <ShoppingBag
+                  className="h-3.5 w-3.5 shrink-0"
+                  strokeWidth={2.5}
+                />
+
+                <span className="whitespace-nowrap">Shop Now</span>
+
+                <ArrowRight
+                  className="h-3.5 w-3.5 shrink-0 transition-transform group-hover/button:translate-x-0.5"
+                  strokeWidth={2.6}
+                />
+              </Link>
+
+              <Link
+                href="/shop"
+                aria-label="Explore all Gram Ansh product ranges"
+                className="inline-flex min-h-11 items-center justify-center whitespace-nowrap rounded-xl border border-[#d3c2a5] bg-white px-2 text-[8px] font-black uppercase tracking-[0.1em] text-[#704722] shadow-[0_6px_16px_rgba(63,48,23,0.07)] transition-transform active:scale-[0.98]"
+              >
+                Explore Range
+              </Link>
+            </div>
           </div>
-
-          <button
-            onClick={() => handleSlide("next")}
-            className="rounded-full p-1 text-white transition-colors hover:text-amber-400"
-            aria-label="Next banner slide"
-            type="button"
-          >
-            <ChevronRight size={24} />
-          </button>
         </div>
-      ) : null}
-
-      <div className="absolute right-10 top-1/2 z-20 hidden -translate-y-1/2 flex-col items-center gap-6 text-white/40 xl:flex">
-        <span className="h-24 w-px bg-gradient-to-b from-transparent via-white/50 to-transparent" />
-        <p className="vertical-text rotate-180 font-headline text-[11px] font-semibold uppercase tracking-[0.4em]">
-          Premium Agrarian
-        </p>
-        <span className="h-24 w-px bg-gradient-to-b from-white/50 via-white/50 to-transparent" />
       </div>
     </section>
   );

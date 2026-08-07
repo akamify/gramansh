@@ -20,17 +20,23 @@ import {
 import {
   CategoryNode,
   ProductItem,
+  HighlightRow,
   IngredientRow,
   NutritionRow,
+  SpecificationRow,
   WeightUnit,
   VariantRow,
   WEIGHT_UNIT_OPTIONS,
   DESCRIPTION_MAX_LENGTH,
+  HIGHLIGHTS_COUNT,
   INGREDIENTS_COUNT,
   NUTRITIONS_COUNT,
+  SPECIFICATIONS_COUNT,
   createEmptyVariant,
+  createEmptyHighlight,
   createEmptyIngredient,
   createEmptyNutrition,
+  createEmptySpecification,
   normalizeSkuInput,
   parseCategoryId,
   toEditorHtml,
@@ -95,6 +101,10 @@ function LocalImagePreview({ file }: { file: File }) {
   );
 }
 
+function fileSignature(file: File) {
+  return `${file.name}-${file.size}-${file.lastModified}`;
+}
+
 const findCategoryNameById = (nodes: CategoryNode[], id: string): string | null => {
   for (const node of nodes) {
     if (String(node._id) === id || String(node.id || '') === id) return node.name;
@@ -123,7 +133,9 @@ export default function ProductEditor({
   const [newCategoryName, setNewCategoryName] = useState('');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [highlights, setHighlights] = useState('');
+  const [highlights, setHighlights] = useState<HighlightRow[]>(
+    Array.from({ length: HIGHLIGHTS_COUNT }, () => createEmptyHighlight())
+  );
   const [variants, setVariants] = useState<VariantRow[]>([createEmptyVariant()]);
   const [codAvailable, setCodAvailable] = useState(false);
   const [sku, setSku] = useState('');
@@ -132,6 +144,9 @@ export default function ProductEditor({
   );
   const [nutritions, setNutritions] = useState<NutritionRow[]>(
     Array.from({ length: NUTRITIONS_COUNT }, () => createEmptyNutrition())
+  );
+  const [specifications, setSpecifications] = useState<SpecificationRow[]>(
+    Array.from({ length: SPECIFICATIONS_COUNT }, () => createEmptySpecification())
   );
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
   const [descriptionTextLength, setDescriptionTextLength] = useState(0);
@@ -156,12 +171,13 @@ export default function ProductEditor({
     if (editorRef.current) {
       editorRef.current.innerHTML = '';
     }
-    setHighlights('');
+    setHighlights(Array.from({ length: HIGHLIGHTS_COUNT }, () => createEmptyHighlight()));
     setVariants([createEmptyVariant()]);
     setCodAvailable(false);
     setSku('');
     setIngredients(Array.from({ length: INGREDIENTS_COUNT }, () => createEmptyIngredient()));
     setNutritions(Array.from({ length: NUTRITIONS_COUNT }, () => createEmptyNutrition()));
+    setSpecifications(Array.from({ length: SPECIFICATIONS_COUNT }, () => createEmptySpecification()));
     setSelectedCategoryId('');
     setRenameCategoryName('');
     setRenameCategoryBusy(false);
@@ -183,7 +199,14 @@ export default function ProductEditor({
       }
       setSku(product.sku || '');
       setCodAvailable(product.cod_available === true || product.cod_available === 'true' || product.codAvailable === true || product.codAvailable === 'true');
-      setHighlights(Array.isArray(product.key_highlights) ? product.key_highlights.join('\n') : '');
+      const highlightRows =
+        Array.isArray(product.key_highlights) && product.key_highlights.length
+          ? product.key_highlights.map((s: Record<string, unknown>) => ({
+            key: String(s.key || ''),
+            value: String(s.value || ''),
+          }))
+          : Array.from({ length: HIGHLIGHTS_COUNT }, () => createEmptyHighlight());
+      setHighlights(highlightRows);
       setSelectedCategoryId(parseCategoryId(product.catagory_id));
 
       const ingredientRows =
@@ -203,6 +226,15 @@ export default function ProductEditor({
           }))
           : Array.from({ length: NUTRITIONS_COUNT }, () => createEmptyNutrition());
       setNutritions(nutritionRows);
+
+      const specificationRows =
+        Array.isArray(product.specifications) && product.specifications.length
+          ? product.specifications.map((s: Record<string, unknown>) => ({
+            key: String(s.key || ''),
+            value: String(s.value || ''),
+          }))
+          : Array.from({ length: SPECIFICATIONS_COUNT }, () => createEmptySpecification());
+      setSpecifications(specificationRows);
 
       const mappedVariants: VariantRow[] =
         Array.isArray(product.variants) && product.variants.length
@@ -454,11 +486,12 @@ export default function ProductEditor({
       form.append('categoryId', selectedCategoryId);
       form.append('status', 'published');
       form.append('draft_stage', 'complete');
-      form.append('key_highlights', highlights);
+      form.append('key_highlights', JSON.stringify(highlights.filter((item) => item.key.trim() && item.value.trim())));
       form.append('sku', sku);
       form.append('cod_available', codAvailable ? 'true' : 'false');
       form.append('ingredients', JSON.stringify(ingredients.filter((i) => i.key.trim() && i.value.trim())));
       form.append('nutritions', JSON.stringify(nutritions.filter((n) => n.key.trim() && n.value.trim())));
+      form.append('specification', JSON.stringify(specifications.filter((item) => item.key.trim() && item.value.trim())));
 
       const backendVariants = variants.map((v) => ({
         label: v.weight.trim() + v.weightUnit,
@@ -649,10 +682,10 @@ export default function ProductEditor({
               <div className="space-y-8">
                 <div>
                   <h3 className="text-2xl font-semibold tracking-tight text-slate-900">
-                    Core Info + Specs
+                    Product Story + Selling Details
                   </h3>
                   <p className="mt-1 text-sm text-slate-500">
-                    Add the content customers see first.
+                    Build a cleaner listing for masalas, oils, and pantry products with useful buyer-facing content.
                   </p>
                 </div>
 
@@ -664,6 +697,7 @@ export default function ProductEditor({
                     <input
                       value={name}
                       onChange={(e) => setName(e.target.value)}
+                      placeholder="Cold Pressed Mustard Oil / Turmeric Powder"
                       className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-slate-400 focus:bg-white"
                     />
                   </div>
@@ -676,6 +710,7 @@ export default function ProductEditor({
                       value={sku}
                       onChange={(e) => setSku(normalizeSkuInput(e.target.value))}
                       maxLength={6}
+                      placeholder="GA-101"
                       className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm tracking-widest outline-none transition focus:border-slate-400 focus:bg-white"
                     />
                     <p className="mt-2 text-xs text-slate-500">Format: AB-123</p>
@@ -688,7 +723,7 @@ export default function ProductEditor({
                           Description
                         </label>
                         <p className="mt-1 text-sm text-slate-500">
-                          Rich text with a plain-text character limit.
+                          Describe aroma, purity, processing method, and ideal kitchen use.
                         </p>
                       </div>
                       <p
@@ -747,7 +782,85 @@ export default function ProductEditor({
                   <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
                     <div className="mb-4 flex items-center justify-between">
                       <h4 className="text-xl font-semibold tracking-tight text-slate-900">
-                        Ingredients
+                        Quick Highlights
+                      </h4>
+                      <span className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">
+                        {HIGHLIGHTS_COUNT} points
+                      </span>
+                    </div>
+
+                    <div className="space-y-3">
+                      {highlights.map((highlight, index) => (
+                        <div key={index} className="grid grid-cols-12 gap-3">
+                          <input
+                            value={highlight.key}
+                            onChange={(e) => {
+                              const next = [...highlights];
+                              next[index] = { ...next[index], key: e.target.value };
+                              setHighlights(next);
+                            }}
+                            placeholder="Highlight label"
+                            className="col-span-12 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none transition focus:border-slate-400 focus:bg-white sm:col-span-5"
+                          />
+                          <input
+                            value={highlight.value}
+                            onChange={(e) => {
+                              const next = [...highlights];
+                              next[index] = { ...next[index], value: e.target.value };
+                              setHighlights(next);
+                            }}
+                            placeholder="Eg. Wood pressed, single origin, no fillers"
+                            className="col-span-12 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none transition focus:border-slate-400 focus:bg-white sm:col-span-7"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div className="mb-4 flex items-center justify-between">
+                      <h4 className="text-xl font-semibold tracking-tight text-slate-900">
+                        Storage, Shelf Life & Usage
+                      </h4>
+                      <span className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">
+                        {SPECIFICATIONS_COUNT} points
+                      </span>
+                    </div>
+
+                    <div className="space-y-3">
+                      {specifications.map((specification, index) => (
+                        <div key={index} className="grid grid-cols-12 gap-3">
+                          <input
+                            value={specification.key}
+                            onChange={(e) => {
+                              const next = [...specifications];
+                              next[index] = { ...next[index], key: e.target.value };
+                              setSpecifications(next);
+                            }}
+                            placeholder="Shelf life / Storage / Best for"
+                            className="col-span-12 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none transition focus:border-slate-400 focus:bg-white sm:col-span-5"
+                          />
+                          <input
+                            value={specification.value}
+                            onChange={(e) => {
+                              const next = [...specifications];
+                              next[index] = { ...next[index], value: e.target.value };
+                              setSpecifications(next);
+                            }}
+                            placeholder="Eg. 9 months, airtight jar, ideal for tadka"
+                            className="col-span-12 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none transition focus:border-slate-400 focus:bg-white sm:col-span-7"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid gap-6 lg:grid-cols-2">
+                  <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div className="mb-4 flex items-center justify-between">
+                      <h4 className="text-xl font-semibold tracking-tight text-slate-900">
+                        Blend & Ingredient Details
                       </h4>
                       <span className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">
                         {INGREDIENTS_COUNT} points
@@ -764,8 +877,7 @@ export default function ProductEditor({
                               next[index] = { ...next[index], key: e.target.value };
                               setIngredients(next);
                             }}
-                            placeholder="Ingredient name"
-                            required
+                            placeholder="Ingredient / source"
                             className="col-span-12 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none transition focus:border-slate-400 focus:bg-white sm:col-span-5"
                           />
                           <input
@@ -775,8 +887,7 @@ export default function ProductEditor({
                               next[index] = { ...next[index], value: e.target.value };
                               setIngredients(next);
                             }}
-                            placeholder="Details"
-                            required
+                            placeholder="Eg. Stone ground chilli, mustard seed, no additives"
                             className="col-span-12 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none transition focus:border-slate-400 focus:bg-white sm:col-span-7"
                           />
                         </div>
@@ -787,7 +898,7 @@ export default function ProductEditor({
                   <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
                     <div className="mb-4 flex items-center justify-between">
                       <h4 className="text-xl font-semibold tracking-tight text-slate-900">
-                        Nutrition Facts
+                        Kitchen Facts & Usage Notes
                       </h4>
                       <span className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">
                         {NUTRITIONS_COUNT} points
@@ -804,8 +915,7 @@ export default function ProductEditor({
                               next[index] = { ...next[index], key: e.target.value };
                               setNutritions(next);
                             }}
-                            placeholder="Nutrient"
-                            required
+                            placeholder="Aroma / Heat level / Best for"
                             className="col-span-12 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none transition focus:border-slate-400 focus:bg-white sm:col-span-5"
                           />
                           <input
@@ -815,8 +925,7 @@ export default function ProductEditor({
                               next[index] = { ...next[index], value: e.target.value };
                               setNutritions(next);
                             }}
-                            placeholder="Value"
-                            required
+                            placeholder="Eg. Earthy aroma, medium spice, great for curries"
                             className="col-span-12 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none transition focus:border-slate-400 focus:bg-white sm:col-span-7"
                           />
                         </div>
@@ -831,10 +940,10 @@ export default function ProductEditor({
               <div className="space-y-8">
                 <div>
                   <h3 className="text-2xl font-semibold tracking-tight text-slate-900">
-                    Weight Variants + Pricing + Stock
+                    Pack Variants + Pricing + Stock
                   </h3>
                   <p className="mt-1 text-sm text-slate-500">
-                    Add one or more variants with price, discount, stock, and image.
+                    Add one or more pack sizes with pricing, stock, and image support.
                   </p>
                 </div>
 
@@ -850,7 +959,7 @@ export default function ProductEditor({
                         </h4>
                         <button
                           onClick={() => {
-                            const confirmed = window.confirm('Remove this weight variant?');
+                            const confirmed = window.confirm('Remove this pack variant?');
                             if (!confirmed) return;
                             setVariants((prev) =>
                               prev.length === 1 ? prev : prev.filter((_, i) => i !== variantIndex)
@@ -995,32 +1104,59 @@ export default function ProductEditor({
                           Variant Images (max 4)
                         </label>
                         <input
+                          id={`variant-images-${variantIndex}`}
                           type="file"
                           accept="image/*"
                           multiple
                           onChange={(e) => {
                             const files = Array.from(e.target.files || []);
                             const next = [...variants];
-                            if (files.length > 4) {
+                            const currentImages = Array.isArray(next[variantIndex].images)
+                              ? next[variantIndex].images
+                              : [];
+                            const existingSignatures = new Set(
+                              currentImages.map((file) => fileSignature(file))
+                            );
+                            const uniqueNewFiles = files.filter(
+                              (file) => !existingSignatures.has(fileSignature(file))
+                            );
+                            const mergedFiles = [...currentImages, ...uniqueNewFiles];
+
+                            if (mergedFiles.length > 4) {
                               onError('Maximum 4 images allowed per variant.');
                               next[variantIndex] = {
                                 ...next[variantIndex],
-                                images: files.slice(0, 4),
+                                images: mergedFiles.slice(0, 4),
                                 existingImages: [],
                               };
                               setVariants(next);
+                              e.currentTarget.value = '';
                               return;
                             }
                             onError('');
                             next[variantIndex] = {
                               ...next[variantIndex],
-                              images: files,
-                              existingImages: files.length > 0 ? [] : next[variantIndex].existingImages,
+                              images: mergedFiles,
+                              existingImages: mergedFiles.length > 0 ? [] : next[variantIndex].existingImages,
                             };
                             setVariants(next);
+                            e.currentTarget.value = '';
                           }}
-                          className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none"
+                          className="hidden"
                         />
+
+                        <div className="flex flex-wrap items-center gap-3">
+                          <label
+                            htmlFor={`variant-images-${variantIndex}`}
+                            className="inline-flex cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                          >
+                            Choose Images
+                          </label>
+
+                          <span className="text-xs text-slate-500">
+                            PNG or JPG, square `500 x 500` recommended, up to 4 images.
+                          </span>
+                        </div>
 
                         {variant.existingImages.length > 0 && variant.images.length === 0 ? (
                           <div className="flex gap-3 overflow-x-auto pt-2 pb-1">
@@ -1043,11 +1179,28 @@ export default function ProductEditor({
 
                         {variant.images.length > 0 ? (
                           <div className="flex gap-3 overflow-x-auto pt-2 pb-1">
-                            {variant.images.slice(0, 4).map((file) => (
-                              <LocalImagePreview
+                            {variant.images.slice(0, 4).map((file, imageIndex) => (
+                              <div
                                 key={`${file.name}-${file.lastModified}-${file.size}`}
-                                file={file}
-                              />
+                                className="relative"
+                              >
+                                <LocalImagePreview file={file} />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const next = [...variants];
+                                    next[variantIndex] = {
+                                      ...next[variantIndex],
+                                      images: next[variantIndex].images.filter((_, idx) => idx !== imageIndex),
+                                    };
+                                    setVariants(next);
+                                  }}
+                                  className="absolute -right-2 -top-2 grid h-6 w-6 place-items-center rounded-full bg-rose-600 text-white shadow-md transition hover:bg-rose-700"
+                                  aria-label="Remove selected image"
+                                >
+                                  <span className="material-symbols-outlined text-sm">close</span>
+                                </button>
+                              </div>
                             ))}
                           </div>
                         ) : null}
@@ -1121,7 +1274,7 @@ export default function ProductEditor({
                     onClick={() => setVariants((prev) => [...prev, createEmptyVariant()])}
                     className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
                   >
-                    Add Weight Variant
+                    Add Pack Variant
                   </button>
 
                   <div className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white">

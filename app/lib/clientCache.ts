@@ -19,7 +19,7 @@ function isFresh(savedAt: number, ttlMs: number) {
 }
 
 function safeKey(key: string) {
-  return `jaggery_cache:${key}`;
+  return `gramansh_cache:${key}`;
 }
 
 function readLocal<T>(key: string): CacheEnvelope<T> | null {

@@ -26,7 +26,7 @@ import { useRequireAdminSession } from "@/app/lib/guards";
 import { adminLogout } from "@/app/lib/apiClient";
 import { useSiteSettings } from "@/app/context/SiteSettingsContext";
 
-const ADMIN_SIDEBAR_STORAGE_KEY = "amila_admin_sidebar_state";
+const ADMIN_SIDEBAR_STORAGE_KEY = "gramansh_admin_sidebar_state";
 
 function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -56,7 +56,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const username = getAdminUsername() || "Admin User";
   const { settings } = useSiteSettings();
 
-  const siteName = settings.siteName || "AMILA";
+  const siteName = settings.siteName || "GRAM ANSH";
   const logoUrl =
     typeof settings.logoUrl === "string" ? settings.logoUrl.trim() : "";
 
@@ -169,10 +169,10 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     collapsed?: boolean;
     mobile?: boolean;
   }) => (
-    <div className="flex h-full flex-col border-r border-slate-200 bg-white text-slate-900">
+    <div className="flex h-full flex-col border-r border-[#dbcbaa] bg-[linear-gradient(180deg,#fffdf8_0%,#f6eddb_100%)] text-slate-900">
       <div
         className={cn(
-          "border-b border-slate-200",
+          "border-b border-[#dbcbaa]",
           collapsed ? "px-3 py-4" : "p-5",
         )}
       >
@@ -192,7 +192,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           >
             <span
               className={cn(
-                "grid shrink-0 place-items-center overflow-hidden rounded-[12px] border border-slate-200 bg-slate-50 text-sm font-black text-slate-950 shadow-sm",
+                "grid shrink-0 place-items-center overflow-hidden rounded-[14px] border border-[#d7c39a] bg-[#fff9ef] text-sm font-black text-slate-950 shadow-[0_14px_28px_rgba(89,64,29,0.08)]",
                 collapsed ? "h-11 w-11" : "h-12 w-12",
               )}
             >
@@ -200,7 +200,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 <img
                   src={logoUrl}
                   alt={`${siteName} logo`}
-                  className="h-full w-full object-contain p-1.5"
+                  className="h-full w-full object-contain p-1"
                   onError={(event) => {
                     event.currentTarget.style.display = "none";
                   }}
@@ -212,12 +212,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
             {!collapsed ? (
               <span className="min-w-0">
-                <span className="block truncate text-lg font-black uppercase tracking-[-0.04em] text-slate-950">
+                <span className="block truncate text-lg font-black tracking-[-0.04em] text-[#234a22]">
                   {siteName}
-                  <span className="text-red-600">.</span>CORE
+                  <span className="text-[#9a6a2f]">.</span>CORE
                 </span>
-                <span className="mt-0.5 block text-[9px] font-black uppercase tracking-[0.32em] text-slate-400">
-                  Admin Panel
+                <span className="mt-0.5 block text-[9px] font-black uppercase tracking-[0.32em] text-[#9a7743]">
+                  Operations Console
                 </span>
               </span>
             ) : null}
@@ -227,7 +227,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             <button
               type="button"
               onClick={() => setIsMobileOpen(false)}
-              className="grid h-9 w-9 place-items-center rounded-[10px] text-slate-400 transition hover:bg-slate-100 hover:text-slate-950 active:scale-[0.96]"
+              className="grid h-9 w-9 place-items-center rounded-[10px] text-[#8f7d5f] transition hover:bg-[#f2e4ca] hover:text-[#234a22] active:scale-[0.96]"
               aria-label="Close sidebar"
             >
               <X size={18} strokeWidth={2.6} />
@@ -268,14 +268,14 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                   ? "h-11 justify-center px-0"
                   : "h-11 gap-3 px-3",
                 isActive
-                  ? "bg-slate-950 text-white shadow-[0_10px_24px_rgba(15,23,42,0.16)]"
-                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-950",
+                  ? "bg-[linear-gradient(135deg,#234a22,#3a6a2e)] text-white shadow-[0_14px_28px_rgba(35,74,34,0.24)]"
+                  : "text-[#62553e] hover:bg-[#f5ead5] hover:text-[#234a22]",
               )}
             >
               {isActive ? (
                 <span
                   className={cn(
-                    "absolute rounded-full bg-red-500",
+                    "absolute rounded-full bg-[#c48b37]",
                     collapsed
                       ? "-left-1 top-1/2 h-6 w-1 -translate-y-1/2"
                       : "left-0 top-1/2 h-5 w-1 -translate-y-1/2",
@@ -290,7 +290,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                   "shrink-0 transition-colors",
                   isActive
                     ? "text-white"
-                    : "text-slate-500 group-hover:text-red-600",
+                    : "text-[#867454] group-hover:text-[#9a6a2f]",
                 )}
               />
 
@@ -304,10 +304,15 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         })}
       </nav>
 
-      <div className={cn("border-t border-slate-200", collapsed ? "p-3" : "p-4")}>
+      <div
+        className={cn(
+          "border-t border-[#dbcbaa] bg-[linear-gradient(180deg,rgba(251,247,239,0.9),rgba(244,234,213,0.95))]",
+          collapsed ? "p-3" : "p-4",
+        )}
+      >
         <div
           className={cn(
-            "rounded-[14px] border border-slate-200 bg-slate-50",
+            "rounded-[18px] border border-[#dbcbaa] bg-[linear-gradient(135deg,#fffdf8,#f3e6c9)]",
             collapsed ? "grid gap-2 p-2" : "p-3",
           )}
         >
@@ -317,17 +322,17 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               collapsed ? "justify-center" : "gap-3",
             )}
           >
-            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-[12px] bg-slate-950 text-xs font-black text-white shadow-sm">
+            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-[12px] bg-[linear-gradient(135deg,#234a22,#3a6a2e)] text-xs font-black text-white shadow-[0_10px_24px_rgba(35,74,34,0.22)]">
               {getInitials(username)}
             </div>
 
             {!collapsed ? (
               <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-black text-slate-950">
+                <p className="truncate text-xs font-black text-[#203f1f]">
                   {username}
                 </p>
-                <p className="mt-0.5 text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">
-                  Root Admin
+                <p className="mt-0.5 text-[9px] font-black uppercase tracking-[0.18em] text-[#9a7743]">
+                  Gram Ansh Admin
                 </p>
               </div>
             ) : null}
@@ -336,7 +341,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] text-slate-400 transition hover:bg-red-50 hover:text-red-600 active:scale-[0.96]"
+                className="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] text-[#8f7d5f] transition hover:bg-[#f3e6cf] hover:text-[#8a5320] active:scale-[0.96]"
                 aria-label="Logout"
                 title="Logout"
               >
@@ -349,7 +354,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             <button
               type="button"
               onClick={handleLogout}
-              className="grid h-9 w-full place-items-center rounded-[10px] text-slate-400 transition hover:bg-red-50 hover:text-red-600 active:scale-[0.96]"
+              className="grid h-9 w-full place-items-center rounded-[10px] text-[#8f7d5f] transition hover:bg-[#f3e6cf] hover:text-[#8a5320] active:scale-[0.96]"
               aria-label="Logout"
               title="Logout"
             >
@@ -362,7 +367,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   );
 
   return (
-    <div className="admin-shell flex min-h-screen overflow-hidden bg-slate-50 text-slate-900">
+    <div className="admin-shell flex min-h-screen overflow-hidden bg-[#f7f2e8] text-slate-900">
       <aside
         className={cn(
           "fixed inset-y-0 left-0 z-50 hidden flex-col transition-[width] duration-300 lg:flex",
@@ -374,7 +379,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         <button
           type="button"
           onClick={toggleCollapsed}
-          className="absolute -right-4 top-6 grid h-8 w-8 place-items-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:border-slate-300 hover:text-slate-950 active:scale-[0.96]"
+          className="absolute -right-4 top-6 grid h-8 w-8 place-items-center rounded-full border border-[#dbcbaa] bg-[#fffaf0] text-[#6e6147] shadow-[0_12px_24px_rgba(89,64,29,0.12)] transition hover:border-[#bb9657] hover:text-[#234a22] active:scale-[0.96]"
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
@@ -416,14 +421,14 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           isCollapsed ? "lg:ml-20" : "lg:ml-72",
         )}
       >
-        <header className="sticky top-0 z-40 flex items-center justify-between border-b border-slate-200 bg-white/95 px-4 py-3 text-slate-900 backdrop-blur lg:hidden">
+        <header className="sticky top-0 z-40 flex items-center justify-between border-b border-[#dbcbaa] bg-[rgba(255,250,241,0.96)] px-4 py-3 text-slate-900 backdrop-blur lg:hidden">
           <Link href="/admin" className="flex min-w-0 items-center gap-2">
-            <span className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-[12px] border border-slate-200 bg-slate-50 text-xs font-black text-slate-950">
+            <span className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-[12px] border border-[#d7c39a] bg-[#fffaf0] text-xs font-black text-slate-950 shadow-[0_10px_22px_rgba(89,64,29,0.08)]">
               {logoUrl ? (
                 <img
                   src={logoUrl}
                   alt={`${siteName} logo`}
-                  className="h-full w-full object-contain p-1.5"
+                  className="h-full w-full object-contain p-1"
                   onError={(event) => {
                     event.currentTarget.style.display = "none";
                   }}
@@ -434,11 +439,11 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             </span>
 
             <span className="min-w-0">
-              <span className="block truncate text-sm font-black uppercase tracking-[-0.03em] text-slate-950">
+              <span className="block truncate text-sm font-black tracking-[-0.04em] text-[#234a22]">
                 {siteName}
               </span>
-              <span className="block text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">
-                Admin Panel
+              <span className="block text-[9px] font-black uppercase tracking-[0.18em] text-[#9a7743]">
+                Operations Console
               </span>
             </span>
           </Link>
@@ -446,7 +451,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           <button
             type="button"
             onClick={() => setIsMobileOpen(true)}
-            className="grid h-10 w-10 place-items-center rounded-[12px] border border-slate-200 bg-slate-50 text-slate-700 transition hover:bg-slate-100 active:scale-[0.96]"
+            className="grid h-10 w-10 place-items-center rounded-[12px] border border-[#dbcbaa] bg-[#fffaf0] text-[#234a22] transition hover:bg-[#f5ead6] active:scale-[0.96]"
             aria-label="Open sidebar"
           >
             <Menu size={22} strokeWidth={2.6} />
@@ -477,6 +482,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
         .admin-shell {
           color-scheme: light;
+          background:
+            radial-gradient(circle at top left, rgba(229, 209, 165, 0.34), transparent 30%),
+            linear-gradient(180deg, #fcf8f0 0%, #f5eddc 100%);
         }
 
         .admin-sidebar-scroll {

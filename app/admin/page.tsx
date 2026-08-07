@@ -94,7 +94,7 @@ export default function AdminDashboard() {
       const recent = products.filter(p => (toDate(p.createdAt)?.getTime() || 0) >= (Date.now() - 30*24*60*60*1000)).length;
 
       return [
-         { label: 'Gross Revenue', value: `${currency}${totalRevenue.toLocaleString(undefined, {minimumFractionDigits: 2})}`, sub: 'Total Volume', icon: <Zap size={16}/>, color: 'text-red-600' },
+         { label: 'Gross Revenue', value: `${currency}${totalRevenue.toLocaleString(undefined, {minimumFractionDigits: 2})}`, sub: 'Total Volume', icon: <Zap size={16}/>, color: 'text-[#9a6a2f]' },
          { label: 'Active Pipeline', value: String(active), sub: 'Orders in Flight', icon: <Truck size={16}/>, color: 'text-blue-500' },
          { label: 'Inventory Growth', value: String(recent), sub: 'Last 30 Days', icon: <Package size={16}/>, color: 'text-amber-500' },
          { label: 'Conversion', value: `${conversionRate.toFixed(2)}%`, sub: 'Active Sessions', icon: <Activity size={16}/>, color: 'text-emerald-500' },
@@ -115,42 +115,42 @@ export default function AdminDashboard() {
       <div className="space-y-12">
          <header className="space-y-2">
             <div className="flex items-center gap-2">
-               <span className="w-8 h-px bg-red-600" />
-               <span className="text-[10px] font-black tracking-[0.4em] text-red-600 uppercase">System Overview</span>
+               <span className="h-px w-8 bg-[#9a6a2f]" />
+               <span className="text-[10px] font-black tracking-[0.4em] text-[#9a6a2f] uppercase">Gram Ansh Overview</span>
             </div>
-            <h2 className="text-5xl md:text-7xl font-black tracking-tighter uppercase italic text-slate-900 dark:text-white">Command Center</h2>
+            <h2 className="text-5xl md:text-7xl font-black tracking-tighter uppercase italic text-[#234a22]">Command Center</h2>
          </header>
 
          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
             {stats.map((stat, idx) => (
                <motion.div 
                   initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }}
-                  key={idx} className="bg-white dark:bg-[#0f1115] border border-slate-200 dark:border-white/5 p-8 rounded-2xl shadow-sm hover:border-red-600/50 transition-all group relative overflow-hidden"
+                  key={idx} className="relative overflow-hidden rounded-[24px] border border-[#dccaa7] bg-[linear-gradient(180deg,#fffdf8_0%,#f8f1e3_100%)] p-8 shadow-[0_18px_36px_rgba(87,64,26,0.08)] transition-all hover:border-[#b28a49] group"
                >
                   <div className="flex justify-between items-start mb-6">
                      <span className="text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase">{stat.label}</span>
-                     <div className={`${stat.color} p-2 bg-slate-50 dark:bg-white/5 rounded-lg`}>{stat.icon}</div>
+                     <div className={`${stat.color} rounded-xl bg-[#f7eddc] p-2`}>{stat.icon}</div>
                   </div>
                   <div className="relative z-10">
-                     <span className="text-3xl font-black block tracking-tight dark:text-white">{stat.value}</span>
+                     <span className="block text-3xl font-black tracking-tight text-[#234a22]">{stat.value}</span>
                      <span className="text-[9px] font-bold tracking-widest text-slate-500 uppercase mt-1 block">{stat.sub}</span>
                   </div>
-                  <div className="absolute -bottom-4 -right-4 text-slate-100 dark:text-white/[0.02] group-hover:text-red-600/[0.05] transition-colors"><TrendingUp size={100}/></div>
+                  <div className="absolute -bottom-4 -right-4 text-[#efe5d2] transition-colors group-hover:text-[#9a6a2f]/10"><TrendingUp size={100}/></div>
                </motion.div>
             ))}
          </div>
 
          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* Chart Area */}
-            <div className="lg:col-span-8 bg-white dark:bg-[#0f1115] border border-slate-200 dark:border-white/5 rounded-3xl p-8 shadow-sm">
+            <div className="lg:col-span-8 rounded-[28px] border border-[#dccaa7] bg-[linear-gradient(180deg,#fffdf8_0%,#f7efdf_100%)] p-8 shadow-[0_18px_36px_rgba(87,64,26,0.08)]">
                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-12">
                   <div>
-                     <h3 className="text-xl font-black tracking-tighter uppercase italic dark:text-white">Revenue Stream</h3>
+                     <h3 className="text-xl font-black tracking-tighter uppercase italic text-[#234a22]">Revenue Stream</h3>
                      <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Financial Performance Index</p>
                   </div>
-                  <div className="flex gap-1 bg-slate-100 dark:bg-white/5 p-1 rounded-xl">
+                  <div className="flex gap-1 rounded-xl bg-[#f3e8d5] p-1">
                      {(['weekly', 'monthly', 'yearly'] as TrendRange[]).map((opt) => (
-                        <button key={opt} onClick={() => setRange(opt)} className={`px-4 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${range === opt ? 'bg-red-600 text-white shadow-lg' : 'text-slate-500 hover:text-red hover:bg-white/5'}`}>{opt}</button>
+                        <button key={opt} onClick={() => setRange(opt)} className={`px-4 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all ${range === opt ? 'bg-[#234a22] text-white shadow-lg' : 'text-[#7b684d] hover:text-[#234a22] hover:bg-white/70'}`}>{opt}</button>
                      ))}
                   </div>
                </div>
@@ -167,7 +167,7 @@ export default function AdminDashboard() {
                         <div key={i} className="flex-1 group relative flex flex-col justify-end h-full">
                            <motion.div 
                               initial={{ height: 0 }} animate={{ height: `${height}%` }}
-                              className="w-full bg-gradient-to-t from-red-600 to-red-400 rounded-t-sm group-hover:from-red-500 group-hover:to-red-300 transition-all relative"
+                              className="relative w-full rounded-t-sm bg-gradient-to-t from-[#234a22] to-[#c79a49] transition-all group-hover:from-[#2c5a27] group-hover:to-[#d3aa62]"
                            >
                               <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[8px] font-black px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-20">
                                  {currency}{p.value.toFixed(0)}
@@ -182,9 +182,9 @@ export default function AdminDashboard() {
 
             {/* Activity Feed */}
             <div className="lg:col-span-4 space-y-8">
-               <div className="bg-white text-slate-900 dark:bg-[#0f1115] dark:text-white rounded-3xl p-8 border border-slate-200 dark:border-white/5 shadow-xl">
+               <div className="rounded-[28px] border border-[#dccaa7] bg-[linear-gradient(180deg,#fffdf8_0%,#f7efdf_100%)] p-8 text-slate-900 shadow-[0_18px_36px_rgba(87,64,26,0.08)]">
                   <div className="flex items-center gap-3 mb-8">
-                     <Calendar size={18} className="text-red-600" />
+                     <Calendar size={18} className="text-[#9a6a2f]" />
                      <h3 className="text-lg font-black tracking-tighter uppercase italic">Real-Time Feed</h3>
                   </div>
                   <div className="space-y-6">
@@ -192,11 +192,11 @@ export default function AdminDashboard() {
                         <div key={i} className="flex gap-4 group">
                            <div className="w-1 h-10 bg-slate-200 dark:bg-white/10 rounded-full group-hover:bg-red-600 transition-colors" />
                            <div>
-                              <p className="text-[10px] font-black tracking-wider uppercase text-slate-600 dark:text-slate-300">
+                              <p className="text-[10px] font-black tracking-wider uppercase text-slate-600">
                                  {order.order_code || `ORD-${order.order_id}`}
                               </p>
-                              <p className="text-[9px] font-bold text-slate-500 uppercase mt-0.5">
-                                 STATUS: <span className="text-slate-900 dark:text-white">{order.status || 'PENDING'}</span>
+                              <p className="mt-0.5 text-[9px] font-bold uppercase text-slate-500">
+                                 STATUS: <span className="text-[#234a22]">{order.status || 'PENDING'}</span>
                               </p>
                            </div>
                         </div>

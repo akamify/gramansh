@@ -396,9 +396,10 @@ export interface AdminProductLite {
     category?: string;
     sku?: string;
     description?: string;
-    key_highlights?: string[];
+    key_highlights?: Array<{ key: string; value: string }>;
     ingredients?: Array<{ key: string; value: string }>;
     nutritions?: Array<{ key: string; value: string }>;
+    specifications?: Array<{ key: string; value: string }>;
     catagory_id?: { _id?: string; name?: string } | string;
     variants?: Array<{
         label: string;
@@ -1213,6 +1214,7 @@ export async function fetchAdminProductsLite(): Promise<AdminProductLite[]> {
             key_highlights: Array.isArray(row.key_highlights) ? row.key_highlights : undefined,
             ingredients: Array.isArray(row.ingredients) ? row.ingredients : undefined,
             nutritions: Array.isArray(row.nutritions) ? row.nutritions : undefined,
+            specifications: Array.isArray(row.specifications) ? row.specifications : undefined,
             catagory_id: row.catagory_id,
             variants: Array.isArray(row.variants) ? row.variants : undefined,
             image:

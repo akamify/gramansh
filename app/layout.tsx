@@ -18,10 +18,11 @@ const newsreader = Newsreader({
 
 export const metadata: Metadata = {
   title: {
-    default: "Amila Gold",
+    default: "Gram Ansh",
     template: "%s",
   },
-  description: "Pure organic jaggery and traditional desi gud from Amila Gold.",
+  description:
+    "Gram Ansh offers cold press oils and natural masalas crafted for modern kitchens with a rooted, ingredient-first approach.",
 };
 
 export default function RootLayout({
@@ -34,7 +35,7 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link rel="icon" href="/logo.png" />
+        <link rel="icon" href="/gramansh.png"/>
       </head>
       <body
         suppressHydrationWarning

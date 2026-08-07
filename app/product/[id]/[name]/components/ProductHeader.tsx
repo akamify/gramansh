@@ -290,13 +290,13 @@ export default function ProductHeader({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-16 items-start mt-2 lg:mt-6 w-full max-w-7xl mx-auto px-4 md:px-0">
+    <div className="mx-auto grid w-full max-w-7xl grid-cols-1 items-start gap-4 px-4 lg:grid-cols-12 lg:gap-12 md:px-0">
 
       {/* --- Main Section: Horizontal Scrollable Images (Desktop & Mobile) --- */}
-      <div className="lg:col-span-7 order-1 w-full lg:sticky lg:top-28 self-start">
+      <div className="order-1 w-full self-start lg:col-span-7 lg:sticky lg:top-24">
         {/* Mobile: horizontal scrollable carousel */}
         {/* Mobile: horizontal scrollable carousel */}
-        <div className="lg:hidden relative overflow-hidden rounded-[2rem] bg-surface-container-low shadow-2xl shadow-primary/5">
+        <div className="relative overflow-hidden rounded-[2rem] border border-outline-variant/15 bg-white shadow-[0_18px_50px_rgba(35,74,34,0.08)] lg:hidden">
           <div
             ref={mobileCarouselRef}
             className="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar touch-pan-x"
@@ -341,8 +341,8 @@ export default function ProductHeader({
                     alt={product?.name ?? "Product Image"}
                     sources={[src, ...galleryImages.filter((image) => image !== src)]}
                     eager={idx === 0}
-                    className="h-full w-full object-cover pointer-events-none select-none"
-                  />
+                  className="pointer-events-none h-full w-full select-none object-contain bg-[radial-gradient(circle_at_top,#fffdf7,transparent_50%),linear-gradient(180deg,#fffef9,#f5efe2)] p-4"
+                />
                 </div>
               ))}
           </div>
@@ -369,76 +369,86 @@ export default function ProductHeader({
           <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none z-[1]" />
         </div>
 
-        {/* Desktop: cross-fade hero image */}
-        <div ref={mainImageContainerRef} className="hidden lg:block relative group overflow-hidden rounded-[2rem] bg-surface-container-low shadow-2xl shadow-primary/5 aspect-[4/3]">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeImage}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5, ease: "easeInOut" }}
-              className="absolute inset-0 z-0"
-            >
-              {activeImage ? (
-                <ResilientProductImage
-                  alt={product?.name ?? "Product Image"}
-                  sources={activeImageSources}
-                  eager
-                  onSourceResolved={setResolvedMainImage}
-                  className="h-full w-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-105"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-on-surface-variant/50">No Image</div>
-              )}
-            </motion.div>
-          </AnimatePresence>
+        {/* Desktop: flipkart-style vertical thumbnails + single preview */}
+        <div className="hidden lg:grid lg:grid-cols-[108px_minmax(0,1fr)] lg:gap-5">
+          {galleryImages.length > 0 ? (
+            <div className="hide-scrollbar flex max-h-[640px] flex-col gap-3 overflow-y-auto pr-1">
+              {galleryImages.map((src, index) => {
+                const isActive = src === activeImage;
+                return (
+                  <button
+                    key={`${src}-${index}`}
+                    type="button"
+                    onClick={() => setActiveImage(src)}
+                    className={`relative overflow-hidden rounded-[1.2rem] border bg-white transition-all duration-300 ${
+                      isActive
+                        ? "border-primary shadow-[0_14px_28px_rgba(35,74,34,0.16)] ring-2 ring-primary/20"
+                        : "border-outline-variant/15 hover:border-primary/35"
+                    }`}
+                    aria-label={`View product image ${index + 1}`}
+                  >
+                    <div className="aspect-square">
+                      <ResilientProductImage
+                        alt={`${product?.name ?? "Product"} thumbnail ${index + 1}`}
+                        sources={[src]}
+                        compact
+                        className="h-full w-full object-contain bg-[linear-gradient(180deg,#fffef9,#f6efe3)] p-2"
+                      />
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          ) : null}
 
-          <motion.div
-            animate={{ rotate: [0, 10, 0] }}
-            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-            className="absolute top-4 right-4 w-28 h-28 rounded-full bg-secondary/90 backdrop-blur-md text-on-secondary flex flex-col items-center justify-center text-center p-3 shadow-xl z-10 border border-white/20 pointer-events-none"
+          <div
+            ref={mainImageContainerRef}
+            className="relative overflow-hidden rounded-[2rem] border border-outline-variant/15 bg-white shadow-[0_24px_60px_rgba(35,74,34,0.1)]"
           >
-            <span className="font-label text-[10px] uppercase tracking-widest opacity-80">Pure</span>
-            <span className="font-headline font-black text-2xl leading-none my-0.5">100%</span>
-            <span className="font-headline italic text-xs">Natural</span>
-          </motion.div>
+            <div className="aspect-square">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeImage}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.35, ease: "easeInOut" }}
+                  className="absolute inset-0 z-0"
+                >
+                  {activeImage ? (
+                    <ResilientProductImage
+                      alt={product?.name ?? "Product Image"}
+                      sources={activeImageSources}
+                      eager
+                      onSourceResolved={setResolvedMainImage}
+                      className="h-full w-full object-contain bg-[radial-gradient(circle_at_top,#fffdf7,transparent_46%),linear-gradient(180deg,#fffef9,#f5efe2)] p-10"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-on-surface-variant/50">
+                      No Image
+                    </div>
+                  )}
+                </motion.div>
+              </AnimatePresence>
+            </div>
 
-          <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none z-[1]" />
+            <motion.div
+              animate={{ rotate: [0, 10, 0] }}
+              transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+              className="pointer-events-none absolute right-4 top-4 z-10 flex h-28 w-28 flex-col items-center justify-center rounded-full border border-white/20 bg-secondary/90 p-3 text-center text-on-secondary shadow-xl backdrop-blur-md"
+            >
+              <span className="font-label text-[10px] uppercase tracking-widest opacity-80">Pure</span>
+              <span className="my-0.5 font-headline text-2xl font-black leading-none">100%</span>
+              <span className="font-headline text-xs italic">Natural</span>
+            </motion.div>
+          </div>
         </div>
 
         {/* --- Lower Section: Thumbnails/Scroll Progress (Desktop & Mobile) --- */}
         {galleryImages.length > 0 && (
           <div className="mt-6 w-full">
 
-            {/* Desktop View: Interactive Thumbnails */}
-            <div className="hidden lg:block">
-              <div className="grid grid-cols-4 gap-4">
-                {galleryImages.map((src, index) => {
-                  const isActive = src === activeImage;
-                  return (
-                    <motion.button
-                      key={src}
-                      type="button"
-                      onClick={() => setActiveImage(src)}
-                      whileHover={{ y: -4 }}
-                      whileTap={{ scale: 0.98 }}
-                      className={`relative aspect-square overflow-hidden rounded-2xl ring-2 transition-all duration-300 ${isActive ? "ring-primary shadow-lg shadow-primary/20" : "ring-outline-variant/30 hover:ring-primary/50"}`}
-                      aria-label={`View product image ${index + 1}`}
-                    >
-                      <ResilientProductImage
-                        alt={`${product?.name ?? "Product"} - Image ${index + 1}`}
-                        sources={[src]}
-                        compact
-                        className="h-full w-full object-cover"
-                      />
-                      {/* Subtle overlay on active */}
-                      {isActive && <div className="absolute inset-0 bg-primary/5 z-[1]" />}
-                    </motion.button>
-                  );
-                })}
-              </div>
-            </div>
+            <div className="hidden lg:block" />
 
             {/* Mobile View: Horizontal Scrollable List (Implicit by main section, 
                 but standard practice is often to repeat thumbnails here too 
@@ -468,13 +478,13 @@ export default function ProductHeader({
           </div>
         )}
         {/* Perks */}
-        <div className="grid grid-cols-3 gap-4 mt-5">
+        <div className="mt-5 grid grid-cols-3 gap-3">
           {[
             { icon: 'eco', text: 'Pure' },
             { icon: 'block', text: 'Non Returnable' },
             { icon: 'local_shipping', text: 'Fast Del.' }
           ].map((item, index) => (
-            <div key={index} className="flex flex-col items-center p-4 bg-surface-container-lowest rounded-2xl border border-outline-variant/5 text-center transition-all hover:bg-white shadow-sm">
+            <div key={index} className="flex flex-col items-center rounded-2xl border border-outline-variant/10 bg-white p-4 text-center shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
               <span className="material-symbols-outlined text-secondary mb-1 text-xl">{item.icon}</span>
               <span className="text-[9px] font-black uppercase tracking-tighter text-on-surface-variant">{item.text}</span>
             </div>
@@ -483,17 +493,17 @@ export default function ProductHeader({
       </div>
 
       {/* Product Details Section (Kept mostly the same, minor layout tweaks for padding) */}
-      <div className="lg:col-span-5 self-start lg:h-fit flex flex-col gap-5 lg:gap-4 px-2 lg:px-0 w-full order-2 lg:sticky lg:top-28">
-        <div className="space-y-6">
-          <div className="space-y-6">
+      <div className="order-2 flex w-full flex-col gap-5 self-start px-2 lg:col-span-5 lg:sticky lg:top-24 lg:h-fit lg:gap-4 lg:px-0">
+        <div className="rounded-[2rem] border border-outline-variant/12 bg-white/90 p-4 shadow-[0_18px_40px_rgba(35,74,34,0.06)] backdrop-blur-sm sm:p-6">
+          <div className="space-y-5">
             <nav className="flex items-center gap-3 text-[10px] font-label text-on-surface-variant uppercase tracking-[0.2em]">
               <span className="hover:text-primary cursor-pointer transition-colors" onClick={() => router.push('/shop')}>Collection</span>
               <span className="opacity-30">/</span>
               <span className="text-secondary font-black">{product?.collection || "Essentials"}</span>
             </nav>
 
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-2 min-w-0">
-              <h1 className="min-w-0 font-headline text-4xl md:text-5xl lg:text-6xl font-bold text-primary tracking-tighter leading-[1.1] break-words whitespace-normal">
+            <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <h1 className="min-w-0 font-headline text-3xl font-bold leading-[1.05] tracking-[-0.05em] text-primary break-words whitespace-normal md:text-4xl lg:text-5xl">
                 {product?.name ?? 'Premium Product'}
               </h1>
             </div>
@@ -503,8 +513,8 @@ export default function ProductHeader({
             ) : null}
 
             <div className="flex items-center justify-between gap-6">
-              <div className="flex items-center gap-4 flex-row">
-                <span className="text-4xl font-headline font-bold text-secondary">
+              <div className="flex flex-row items-end gap-4">
+                <span className="font-headline text-3xl font-bold text-secondary md:text-4xl">
                   {currencySymbol}{Number(displayPrice || 0).toFixed(2)}
                 </span>
                 {displayOriginal && (
@@ -526,20 +536,20 @@ export default function ProductHeader({
             </div>
           </div>
 
-          <div className="space-y-10">
+          <div className="space-y-7">
             {descriptionHtml ? (
               <div
-                className="product-description text-base md:text-lg text-on-surface-variant/80 font-body leading-relaxed space-y-4 [&_p]:m-0 [&_h1]:mt-0 [&_h1]:text-3xl [&_h1]:font-black [&_h1]:tracking-tight [&_h1]:text-primary [&_h2]:mt-0 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:tracking-tight [&_h1]:text-primary [&_h3]:mt-0 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:tracking-tight [&_h3]:text-primary [&_strong]:font-bold [&_em]:italic [&_u]:underline [&_ul]:my-4 [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:pl-6 [&_ol]:my-4 [&_ol]:list-decimal [&_ol]:space-y-2 [&_ol]:pl-6 [&_li]:pl-1 [&_br]:block [&_br]:h-3"
+                className="product-description text-sm leading-7 text-on-surface-variant/80 space-y-4 font-body md:text-base [&_p]:m-0 [&_h1]:mt-0 [&_h1]:text-3xl [&_h1]:font-black [&_h1]:tracking-tight [&_h1]:text-primary [&_h2]:mt-0 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:tracking-tight [&_h1]:text-primary [&_h3]:mt-0 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:tracking-tight [&_h3]:text-primary [&_strong]:font-bold [&_em]:italic [&_u]:underline [&_ul]:my-4 [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:pl-6 [&_ol]:my-4 [&_ol]:list-decimal [&_ol]:space-y-2 [&_ol]:pl-6 [&_li]:pl-1 [&_br]:block [&_br]:h-3"
                 dangerouslySetInnerHTML={{ __html: descriptionHtml }}
               />
             ) : (
-              <p className="text-base md:text-lg text-on-surface-variant/80 font-body leading-relaxed whitespace-pre-wrap">
+              <p className="text-sm leading-7 text-on-surface-variant/80 font-body whitespace-pre-wrap md:text-base">
                 {descriptionText}
               </p>
             )}
 
-            <div className="space-y-4">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-on-surface-variant py-3">Available Options</span>
+            <div className="space-y-3">
+              <span className="py-1 text-[10px] font-black uppercase tracking-[0.2em] text-on-surface-variant">Available Options</span>
               <div className="flex gap-3 flex-wrap">
                 {(product?.sizes && product.sizes.length > 0 ? product.sizes : ['Standard']).map((s) => {
                   const optionVariant = product?.variants?.find(
@@ -570,7 +580,7 @@ export default function ProductHeader({
           </div>
 
           {/* Sticky-ready Actions */}
-          <div className="pt-8 space-y-4 border-t border-outline-variant/20">
+          <div className="space-y-4 border-t border-outline-variant/20 pt-6">
             <div className="flex flex-col sm:flex-row items-stretch gap-4">
               {/* Qty */}
               <div className="flex items-center justify-between bg-surface-container-low rounded-xl px-2 py-2 border border-outline-variant/20">

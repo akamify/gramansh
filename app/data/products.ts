@@ -35,6 +35,7 @@ export interface Product {
   details?: string[];
   ingredients?: Array<{ key: string; value: string }>;
   nutritions?: Array<{ key: string; value: string }>;
+  specifications?: Array<{ key: string; value: string }>;
 }
 
 export function getProductImageSources(product?: Product | null, variantLabel?: string) {

@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ArrowRight, Leaf, ShoppingBag, Sparkles } from "lucide-react";
 import ResilientProductImage from "@/app/components/ResilientProductImage";
 import { useCart } from "@/app/context/CartContext";
 import { useSiteSettings } from "@/app/context/SiteSettingsContext";
@@ -11,11 +12,10 @@ import {
   getProductImageSources,
   type Product,
 } from "@/app/data/products";
-import { fetchFeaturedProducts } from "@/app/lib/productsClient";
 import { peekCached, putCached } from "@/app/lib/clientCache";
 import { flyImageToCart } from "@/app/lib/flyToCart";
+import { fetchFeaturedProducts } from "@/app/lib/productsClient";
 
-// --- Helpers ---
 function formatMoney(currencySymbol: string, value: number) {
   const amount = Number.isFinite(value) ? value : 0;
   return `${currencySymbol}${amount.toLocaleString()}`;
@@ -26,21 +26,8 @@ function discountPct(original: number | undefined, selling: number) {
   return Math.min(95, Math.round(((original - selling) / original) * 100));
 }
 
-/**
- * Mobile:
- * - 2 columns
- * - maximum 5 products
- * - odd last product spans full row but remains vertical
- *
- * Tablet:
- * - 3 columns
- *
- * Desktop:
- * - centered auto-fit grid
- * - existing image design unchanged
- */
 const spotlightGridClass =
-  "grid grid-cols-2 gap-3 md:grid-cols-3 lg:mx-auto lg:w-full lg:max-w-[1396px] lg:grid-cols-[repeat(auto-fit,minmax(230px,250px))] lg:justify-center lg:gap-6 xl:grid-cols-[repeat(auto-fit,minmax(240px,260px))]";
+  "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
 
 export default function SpotlightProductsSection({
   initialProducts = [],
@@ -52,118 +39,120 @@ export default function SpotlightProductsSection({
   loading?: boolean;
 }) {
   const router = useRouter();
-  const [products, setProducts] = useState<Product[]>(initialProducts);
-  const [loading, setLoading] = useState(initialProducts.length === 0);
+  const [fetchedProducts, setFetchedProducts] = useState<Product[] | null>(() => {
+    const cached = peekCached<Product[]>("products:all").data;
+    return Array.isArray(cached) && cached.length ? cached : null;
+  });
+  const [isFetching, setIsFetching] = useState(
+    initialProducts.length === 0 && !managed && fetchedProducts === null,
+  );
 
   const { addItem, isVariantInCart } = useCart();
   const { settings } = useSiteSettings();
 
-  const currencySymbol = settings.currencySymbol || "₹";
+  const currencySymbol = settings.currencySymbol || "\u20B9";
 
   useEffect(() => {
-    if (initialProducts.length > 0) {
-      setProducts(initialProducts);
-      setLoading(false);
-      return;
-    }
-
-    if (managed) {
-      setProducts([]);
-      setLoading(Boolean(externalLoading));
-    }
-  }, [initialProducts, managed, externalLoading]);
-
-  useEffect(() => {
-    if (managed) return;
-    if (initialProducts.length > 0) return;
-
-    const cached = peekCached<Product[]>("products:all").data;
-
-    if (Array.isArray(cached) && cached.length) {
-      setProducts(cached);
-      setLoading(false);
-    }
+    if (managed || initialProducts.length > 0) return;
 
     fetchFeaturedProducts()
       .then((data) => {
         putCached("products:all", 5 * 60 * 1000, data);
-        setProducts(data);
-        setLoading(false);
+        setFetchedProducts(data);
       })
       .catch(() => {
-        setLoading(false);
+        setFetchedProducts((current) => current);
+      })
+      .finally(() => {
+        setIsFetching(false);
       });
   }, [initialProducts.length, managed]);
 
-  const spotlight = useMemo(() => products.slice(0, 5), [products]);
+  const products = useMemo(
+    () =>
+      initialProducts.length > 0
+        ? initialProducts
+        : managed
+          ? []
+          : (fetchedProducts ?? []),
+    [fetchedProducts, initialProducts, managed],
+  );
+  const loading =
+    initialProducts.length > 0
+      ? false
+      : managed
+        ? Boolean(externalLoading)
+        : isFetching && products.length === 0;
+  const spotlight = useMemo(() => products.slice(0, 8), [products]);
 
   return (
-    <section className="bg-[#F9F9F7] pt-10 pb-6 lg:py-20">
-      <div className="container mx-auto px-3 lg:px-6">
-        {/* Header */}
-        <div className="mb-6 flex flex-col justify-between gap-3 md:flex-row md:items-end lg:mb-10">
-          <div className="space-y-1 lg:space-y-2">
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-700/70 lg:text-sm">
-              Curated Collection
-            </span>
+    <section className="relative overflow-hidden bg-[linear-gradient(180deg,#fffdf8_0%,#f5eddc_100%)] py-10 lg:py-20">
+      <div className="pointer-events-none absolute left-0 top-10 h-64 w-64 rounded-full bg-[#d79d44]/10 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-0 right-0 h-72 w-72 rounded-full bg-[#2b5a23]/8 blur-3xl" />
 
-            <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 md:text-5xl">
-              Today’s <span className="text-emerald-800">Spotlight</span>
-            </h2>
+      <div className="container relative mx-auto px-4 lg:px-8">
+        <div className="mb-8 rounded-[30px] border border-[#e6d7c1] bg-white/72 p-5 shadow-[0_18px_50px_rgba(92,72,31,0.08)] backdrop-blur-sm lg:mb-12 lg:p-8">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl">
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#d9ccb5] bg-[#fbf5e8] px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#2b5a23]">
+                <Sparkles className="h-3.5 w-3.5 text-[#b87922]" strokeWidth={2.3} />
+                Gram Ansh spotlight
+              </div>
+
+              <h2 className="text-3xl font-black tracking-[-0.05em] text-[#24461e] md:text-5xl">
+                Best of <span className="text-[#8c5f22]">Gram Ansh</span>
+              </h2>
+
+              <p className="mt-3 max-w-xl text-sm leading-7 text-[#6f5a44] md:text-base">
+                Freshly chosen oils and masalas for everyday cooking, rooted in
+                natural ingredients and clean, traditional preparation.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              {["Cold pressed", "No harsh additives", "Kitchen essentials"].map(
+                (label) => (
+                  <span
+                    key={label}
+                    className="rounded-full border border-[#e5d7bf] bg-white px-3 py-1.5 text-[11px] font-bold text-[#7a4312]"
+                  >
+                    {label}
+                  </span>
+                ),
+              )}
+
+              <Link
+                href="/shop"
+                className="inline-flex items-center gap-2 rounded-full bg-[linear-gradient(135deg,#2b5a23_0%,#4b742f_100%)] px-4 py-2 text-xs font-black uppercase tracking-[0.14em] text-white shadow-[0_12px_30px_rgba(43,90,35,0.2)] transition hover:brightness-105"
+              >
+                Explore Shop
+                <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
+              </Link>
+            </div>
           </div>
-
-          <Link
-            href="/shop"
-            className="hidden items-center gap-1 text-sm font-semibold text-emerald-800 hover:underline md:flex"
-          >
-            View all products
-            <span className="material-symbols-outlined text-sm">
-              arrow_forward
-            </span>
-          </Link>
         </div>
 
-        {/* Loading State */}
         {loading ? (
           <div className={spotlightGridClass}>
-            {Array.from({ length: 5 }).map((_, index) => {
-              const isOddLastMobileCard = index === 4;
-
-              return (
-                <div
-                  key={index}
-                  className={`relative flex flex-col overflow-hidden rounded-[1.5rem] border border-slate-100 bg-white p-3 lg:rounded-[2rem] lg:p-4 ${
-                    isOddLastMobileCard ? "col-span-2 md:col-span-1" : ""
-                  }`}
-                >
-                  <div className="pointer-events-none absolute inset-0 z-10 -translate-x-full animate-[spotlightShimmer_1.6s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/70 to-transparent" />
-
-                  <div className="aspect-square rounded-xl bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100 lg:rounded-[1.5rem]" />
-
-                  <div className="flex flex-grow flex-col gap-2.5 px-2 pt-3 pb-1 lg:px-2.5 lg:pt-4">
-                    <div className="h-3.5 w-4/5 rounded-lg bg-slate-100 lg:h-5" />
-                    <div className="h-3 w-3/5 rounded-lg bg-slate-100 lg:h-4" />
-
-                    <div className="mt-auto flex flex-col gap-2 lg:gap-2.5">
-                      <div className="flex items-center gap-2">
-                        <div className="h-4 w-16 rounded-lg bg-slate-100 lg:h-5 lg:w-20" />
-                        <div className="h-3 w-10 rounded-lg bg-slate-100 lg:h-4" />
-                      </div>
-
-                      <div className="h-10 w-full rounded-xl bg-slate-100 lg:h-11 lg:rounded-2xl" />
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div
+                key={index}
+                className="overflow-hidden rounded-[28px] border border-[#eadfcd] bg-white p-4 shadow-[0_14px_35px_rgba(87,67,25,0.05)]"
+              >
+                <div className="aspect-[4/4.4] animate-pulse rounded-[22px] bg-[linear-gradient(135deg,#f5efe4_0%,#ece4d2_100%)]" />
+                <div className="mt-4 h-4 w-2/3 animate-pulse rounded bg-[#ece4d2]" />
+                <div className="mt-3 h-3 w-1/3 animate-pulse rounded bg-[#f2ead8]" />
+                <div className="mt-5 h-11 animate-pulse rounded-2xl bg-[#ece4d2]" />
+              </div>
+            ))}
           </div>
         ) : spotlight.length === 0 ? (
-          <div className="rounded-3xl bg-white py-10 text-center text-sm font-medium text-slate-500 lg:py-20 lg:text-base">
-            Products are being refreshed. Please check again shortly.
+          <div className="rounded-[28px] border border-[#e6d7c1] bg-white px-6 py-14 text-center text-sm font-medium text-[#7b6a56]">
+            Gram Ansh products are being refreshed. Please check back shortly.
           </div>
         ) : (
           <div className={spotlightGridClass}>
-            {spotlight.map((product, index) => {
+            {spotlight.map((product) => {
               const primary =
                 Array.isArray(product.variants) && product.variants.length > 0
                   ? product.variants[0]
@@ -178,53 +167,68 @@ export default function SpotlightProductsSection({
               const pct = discountPct(displayOriginal, displayPrice);
               const imageSources = getProductImageSources(product, weightLabel);
 
-              const isOddLastMobileCard =
-                spotlight.length % 2 === 1 && index === spotlight.length - 1;
-
               return (
-                <div
+                <article
                   key={product.id}
                   data-product-card
-                  className={`group relative flex flex-col rounded-[1.5rem] border border-slate-100 bg-white p-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_10px_40px_rgba(0,0,0,0.06)] lg:rounded-[2rem] lg:p-4 ${
-                    isOddLastMobileCard ? "col-span-2 md:col-span-1 py-7 px-5" : ""
-                  }`}
+                  className="group flex h-full flex-col overflow-hidden rounded-[30px] border border-[#eadfcd] bg-white p-4 shadow-[0_14px_35px_rgba(87,67,25,0.05)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(87,67,25,0.12)]"
                 >
-                  {/* Image Container - original image behavior kept */}
                   <Link
                     href={createProductHref(product)}
-                    className="relative aspect-square overflow-hidden rounded-xl bg-slate-50 lg:rounded-[1.5rem]"
+                    className="relative block aspect-[4/4.4] overflow-hidden rounded-[24px] bg-[linear-gradient(135deg,#faf5ea_0%,#efe5d2_100%)]"
                   >
-                    {imageSources.length > 0 && (
+                    {imageSources.length > 0 ? (
                       <ResilientProductImage
                         sources={imageSources}
                         alt={product.name}
                         className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                       />
-                    )}
+                    ) : null}
 
-                    {pct > 0 && (
-                      <div className="absolute top-2 left-2 rounded-full bg-emerald-600 px-2 py-0.5 text-[9px] font-black uppercase tracking-tighter text-white backdrop-blur-md lg:top-3 lg:left-3 lg:px-3 lg:py-1 lg:text-[10px]">
-                        -{pct}%
+                    <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-white/25 to-transparent" />
+
+                    {pct > 0 ? (
+                      <div className="absolute left-3 top-3 rounded-full bg-[#24461e] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white">
+                        {pct}% Off
+                      </div>
+                    ) : (
+                      <div className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/88 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#2b5a23] backdrop-blur-sm">
+                        <Leaf className="h-3 w-3 text-[#b87922]" strokeWidth={2.4} />
+                        Natural
                       </div>
                     )}
                   </Link>
 
-                  {/* Content */}
-                  <div className="flex flex-grow flex-col px-2 pt-3 pb-1 lg:px-2.5 lg:pt-4">
-                    <h3 className="mb-2 line-clamp-2 break-words text-sm font-bold leading-snug text-slate-800 transition-colors group-hover:text-emerald-800 lg:mb-3 lg:text-lg">
-                      {product.name}
-                    </h3>
+                  <div className="flex flex-1 flex-col px-1 pt-4">
+                    <div className="mb-2 flex items-start justify-between gap-3">
+                      <h3 className="line-clamp-2 text-base font-black leading-snug text-[#2f261d] transition-colors group-hover:text-[#2b5a23]">
+                        {product.name}
+                      </h3>
 
-                    <div className="mt-auto">
-                      <div className="mb-3 flex flex-wrap items-baseline gap-x-1.5 gap-y-1 lg:mb-5">
-                        <span className="text-sm font-black text-slate-900 lg:text-lg">
-                          {formatMoney(currencySymbol, displayPrice)}
+                      {weightLabel ? (
+                        <span className="shrink-0 rounded-full bg-[#f7f1e6] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[#8c5f22]">
+                          {weightLabel}
                         </span>
+                      ) : null}
+                    </div>
 
-                        {displayOriginal && displayOriginal > displayPrice && (
-                          <span className="text-[10px] text-slate-400 line-through decoration-red-400/50 lg:text-xs">
+                    <p className="mb-5 line-clamp-2 text-sm leading-6 text-[#7b6a56]">
+                      {product.description || "Pure kitchen essentials with a clean, traditional touch."}
+                    </p>
+
+                    <div className="mt-auto flex items-end justify-between gap-3">
+                      <div>
+                        <div className="text-lg font-black text-[#24461e]">
+                          {formatMoney(currencySymbol, displayPrice)}
+                        </div>
+                        {displayOriginal && displayOriginal > displayPrice ? (
+                          <div className="text-xs font-medium text-[#ad8f71] line-through">
                             {formatMoney(currencySymbol, displayOriginal)}
-                          </span>
+                          </div>
+                        ) : (
+                          <div className="text-xs font-medium text-[#8c5f22]">
+                            Gram Ansh quality pick
+                          </div>
                         )}
                       </div>
 
@@ -245,25 +249,13 @@ export default function SpotlightProductsSection({
                           try {
                             const card = (
                               event.currentTarget as HTMLElement | null
-                            )?.closest?.(
-                              "[data-product-card]",
-                            ) as HTMLElement | null;
-
-                            const img = card?.querySelector?.(
-                              "img",
-                            ) as HTMLImageElement | null;
-
+                            )?.closest?.("[data-product-card]") as HTMLElement | null;
+                            const img = card?.querySelector?.("img") as HTMLImageElement | null;
                             const fromRect =
                               img?.getBoundingClientRect?.() ??
-                              (
-                                event.currentTarget as HTMLElement
-                              ).getBoundingClientRect();
-
+                              (event.currentTarget as HTMLElement).getBoundingClientRect();
                             const imageUrl = String(
-                              img?.currentSrc ||
-                                img?.src ||
-                                product.image ||
-                                "",
+                              img?.currentSrc || img?.src || product.image || "",
                             ).trim();
 
                             renderedImageUrl = imageUrl || renderedImageUrl;
@@ -290,31 +282,18 @@ export default function SpotlightProductsSection({
                           });
                         }}
                         disabled={!inStock && !inCart}
-                        className={`flex h-10 w-full transform-gpu items-center justify-center gap-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all duration-500 ease-out active:scale-95 lg:h-11 lg:gap-2 lg:rounded-2xl lg:text-xs ${
+                        className={`inline-flex h-11 items-center justify-center gap-2 rounded-2xl px-4 text-xs font-black uppercase tracking-[0.13em] transition active:scale-[0.98] ${
                           inCart
-                            ? "bg-slate-900 text-white shadow-lg hover:bg-black"
-                            : "bg-emerald-800 text-white shadow-md shadow-emerald-900/10 hover:bg-emerald-700 disabled:bg-slate-200 disabled:text-slate-400"
+                            ? "bg-[#2f261d] text-white hover:bg-black"
+                            : "bg-[linear-gradient(135deg,#d79d44_0%,#b87922_100%)] text-white hover:brightness-105 disabled:bg-[#e7dece] disabled:text-[#9e8b73]"
                         }`}
                       >
-                        <span
-                          className={`material-symbols-outlined text-[16px] transition-transform duration-500 lg:text-[18px] ${
-                            inCart ? "rotate-[360deg]" : ""
-                          }`}
-                        >
-                          {inCart ? "arrow_forward" : "shopping_bag"}
-                        </span>
-
-                        <span>
-                          {inCart
-                            ? "Go To Cart"
-                            : inStock
-                              ? "Add To Cart"
-                              : "Out of Stock"}
-                        </span>
+                        <ShoppingBag className="h-4 w-4" strokeWidth={2.4} />
+                        {inCart ? "Go Cart" : inStock ? "Add" : "Sold Out"}
                       </button>
                     </div>
                   </div>
-                </div>
+                </article>
               );
             })}
           </div>

@@ -247,95 +247,97 @@ export default function ShopPageClient() {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-20">
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8">
                 {getSortedProducts().slice((currentPage - 1) * PRODUCTS_PER_PAGE, currentPage * PRODUCTS_PER_PAGE).map((p) => {
                   const variant = resolveListingVariant(p, selectedWeights);
                   const inStock = variant.stock > 0;
                   const inCart = isVariantInCart(p.id, variant.label, "");
                   const productHref = createProductHref(p, variant.label);
                   return (
-                  <div
+                  <article
                     key={p.id}
                     data-product-card
-                    className="group relative animate-in fade-in slide-in-from-bottom-8 duration-500 fill-mode-both"
+                    className="group relative flex h-full flex-col overflow-hidden rounded-[2rem] border border-outline-variant/15 bg-white p-3 shadow-[0_16px_34px_rgba(35,74,34,0.06)] transition-all duration-500 animate-in fade-in slide-in-from-bottom-8 fill-mode-both hover:-translate-y-1.5 hover:shadow-[0_24px_48px_rgba(35,74,34,0.12)]"
                   >
-                      <div className="flex flex-row-reverse sm:block gap-4 sm:gap-0 items-center">
+                    <Link href={productHref} className="block">
+                      <div className="relative mb-4 aspect-[4/4.6] overflow-hidden rounded-[1.6rem] border border-outline-variant/10 bg-[radial-gradient(circle_at_top,#fffdf7,transparent_45%),linear-gradient(180deg,#fffef9,#f4edde)]">
+                        <ResilientProductImage
+                          sources={[variant.image, p.image, ...(p.images || [])]}
+                          alt={p.name}
+                          className="h-full w-full object-contain p-4 transition-transform duration-700 group-hover:scale-[1.03]"
+                        />
 
-                        {/* RIGHT IMAGE */}
-                        <Link
-                          href={productHref}
-                          className="block order-2 sm:order-none"
-                        >
-                          <div className="relative overflow-hidden rounded-[1rem] bg-surface-container-high w-28 h-30 sm:w-auto sm:h-auto sm:aspect-square sm:mb-8 shadow-sm group-hover:shadow-2xl transition-all duration-700">
-                            <ResilientProductImage
-                              sources={[variant.image, p.image, ...(p.images || [])]}
-                              alt={p.name}
-                              className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105"
-                            />
-
-                            <div className="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                            {!inStock ? <div className="absolute inset-0 z-[2] flex items-center justify-center bg-stone-950/45"><span className="rounded-full bg-white px-4 py-2 text-[10px] font-black uppercase tracking-widest text-error">Out of Stock</span></div> : null}
+                        {variant.originalPrice && variant.originalPrice > variant.price ? (
+                          <div className="absolute left-3 top-3 rounded-full bg-[#224622] px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-white shadow-lg">
+                            {Math.max(1, Math.round(((variant.originalPrice - variant.price) / variant.originalPrice) * 100))}% OFF
                           </div>
-                        </Link>
-                        {/* LEFT CONTENT */}
-                        <div className="flex-1 order-1 sm:order-none">
-                          <Link
-                            href={productHref}
-                            className="block"
-                          >
-                            <div className="flex flex-col gap-2 px-1 sm:px-2">
-                              <div className="flex justify-between items-start">
-                                <h3 className="font-headline text-base sm:text-2xl text-primary font-bold truncate max-w-[180px] sm:max-w-none group-hover:text-secondary transition-colors duration-300">
-                                  {p.name}
-                                </h3>
-                              </div>
+                        ) : null}
 
-                              <div className="flex items-center gap-3">
-                                <span className="text-xl sm:text-2xl font-black text-primary">
-                                  ₹{variant.price}
-                                </span>
-
-                                {variant.originalPrice && (
-                                  <span className="text-xs sm:text-sm text-on-surface-variant/50 line-through font-bold">
-                                    ₹{variant.originalPrice}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </Link>
-
-                          {/* CART BUTTON */}
-                          <div className="mt-4 px-1 sm:px-2">
-                            {inCart ? (
-                              <Link
-                                href="/cart"
-                                className="w-full py-3 sm:py-5 rounded-2xl bg-secondary text-white font-bold text-[10px] sm:text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-2 sm:gap-3 shadow-lg shadow-secondary/30 hover:scale-[1.02] active:scale-95 transition-all"
-                              >
-                                <span className="material-symbols-outlined text-base sm:text-lg">
-                                  shopping_cart_checkout
-                                </span>
-
-                                {inStock ? "Go to Cart" : "Review Cart"}
-                              </Link>
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={(e) => handleAddToCart(p, e)}
-                                disabled={!inStock}
-                                className="w-full py-2 sm:py-5 rounded-2xl bg-white border-2 border-primary text-primary font-bold text-[9px] sm:text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-2 sm:gap-3 hover:bg-primary hover:text-white transition-all duration-300 active:scale-95 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-primary"
-                              >
-                                <span className="material-symbols-outlined text-sm sm:text-lg">
-                                  add_shopping_cart
-                                </span>
-
-                                {inStock ? "Add to Cart" : "Out of Stock"}
-                              </button>
-                            )}
-                          </div>
+                        <div className="absolute bottom-3 right-3 rounded-full bg-white/90 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#8c5f22] shadow-sm backdrop-blur">
+                          {variant.label || "Pack"}
                         </div>
 
+                        {!inStock ? <div className="absolute inset-0 z-[2] flex items-center justify-center bg-stone-950/40"><span className="rounded-full bg-white px-4 py-2 text-[10px] font-black uppercase tracking-widest text-error">Out of Stock</span></div> : null}
+                      </div>
+                    </Link>
+
+                    <div className="flex flex-1 flex-col px-1">
+                      <Link href={productHref} className="block">
+                        <div className="mb-3 flex items-start justify-between gap-3">
+                          <h3 className="line-clamp-2 font-headline text-xl font-bold leading-tight text-primary transition-colors duration-300 group-hover:text-secondary">
+                            {p.name}
+                          </h3>
+                          <span className="shrink-0 rounded-full bg-surface-container-low px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-on-surface-variant">
+                            {variant.label || "Pack"}
+                          </span>
+                        </div>
+
+                        <p className="mb-4 min-h-[3rem] line-clamp-2 text-sm leading-6 text-on-surface-variant/80">
+                          {p.description || "Gram Ansh pantry essential crafted for clean everyday cooking and reliable flavor."}
+                        </p>
+
+                        <div className="mb-5 flex items-end gap-3">
+                          <span className="text-3xl font-black tracking-tight text-primary">
+                            ₹{variant.price}
+                          </span>
+
+                          {variant.originalPrice && (
+                            <span className="pb-1 text-sm font-bold text-on-surface-variant/45 line-through">
+                              ₹{variant.originalPrice}
+                            </span>
+                          )}
+                        </div>
+                      </Link>
+
+                      <div className="mt-auto">
+                        {inCart ? (
+                          <Link
+                            href="/cart"
+                            className="flex w-full items-center justify-center gap-3 rounded-2xl bg-[linear-gradient(135deg,#8c5f22,#b98534)] py-4 text-[11px] font-black uppercase tracking-[0.18em] text-white shadow-[0_12px_24px_rgba(185,133,52,0.24)] transition hover:brightness-105 active:scale-95"
+                          >
+                            <span className="material-symbols-outlined text-lg">
+                              shopping_cart_checkout
+                            </span>
+
+                            Go to Cart
+                          </Link>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={(e) => handleAddToCart(p, e)}
+                            disabled={!inStock}
+                            className="flex w-full items-center justify-center gap-3 rounded-2xl border border-primary bg-white py-4 text-[11px] font-black uppercase tracking-[0.18em] text-primary shadow-sm transition-all duration-300 hover:bg-primary hover:text-white active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white disabled:hover:text-primary"
+                          >
+                            <span className="material-symbols-outlined text-lg">
+                              {inStock ? "add_shopping_cart" : "block"}
+                            </span>
+
+                            {inStock ? "View & Add" : "Out of Stock"}
+                          </button>
+                        )}
                       </div>
                     </div>
+                  </article>
                   );
                 })}
               </div>

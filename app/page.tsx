@@ -1,14 +1,14 @@
 import HomepageClient from "./components/home/HomepageClient";
 
 export const metadata = {
-  title: "Amila Gold – Pure Organic Jaggery, Buy Online",
+  title: "Gram Ansh - Cold Press Oil & Natural Masala",
   description:
-    "Pure, chemical-free jaggery slow-boiled the traditional way in copper vats. No shortcuts, no preservatives. Buy organic jaggery online today.",
+    "Explore Gram Ansh for cold press oils and natural masalas made with a clean, traditional, kitchen-first philosophy.",
   keywords: [
-    "organic jaggery online",
-    "buy organic jaggery online",
-    "desi jaggery online",
-    "organic jaggery near me",
+    "gram ansh",
+    "cold press oil",
+    "natural masala",
+    "traditional kitchen essentials",
   ],
 };
 

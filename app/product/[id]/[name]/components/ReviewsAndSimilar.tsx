@@ -174,7 +174,7 @@ export default function ReviewsAndSimilar({ product }: { product?: Product | nul
         onSubmit={handleSubmitReview}
       />
       {/* Customer Reviews */}
-      <section className="mt-12 lg:mt-24 px-4 md:px-0">
+      <section className="mt-12 px-4 md:px-0 lg:mt-16">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6">
           <div className="space-y-3">
             <h3 className="font-headline text-3xl md:text-4xl font-extrabold text-primary tracking-tight">Customer Stories</h3>
@@ -238,7 +238,7 @@ export default function ReviewsAndSimilar({ product }: { product?: Product | nul
       </section>
 
       {/* Frequently Bought Together / Cross-Sell (SLEEK & MODERN UI) */}
-      <section className="px-3 pt-12 lg:pt-28 pb-12 border-t border-outline-variant/30">
+      <section className="border-t border-outline-variant/30 px-3 pb-12 pt-12 lg:pt-16">
         <div className="flex items-center justify-between mb-10">
           <h3 className="font-headline text-3xl md:text-4xl font-extrabold text-primary tracking-tight">
             {product?.collection ? `${product.collection} — Similar Collections` : 'Similar Collections'}
@@ -254,10 +254,10 @@ export default function ReviewsAndSimilar({ product }: { product?: Product | nul
             const imageSources = getProductImageSources(item, variant.label);
             
             return (
-              <div key={item.id} data-product-card className="group flex flex-col w-[75vw] max-w-[280px] sm:w-[250px] md:w-[240px] lg:w-[260px] snap-start flex-shrink-0">
+              <div key={item.id} data-product-card className="group flex w-[75vw] max-w-[280px] flex-shrink-0 flex-col snap-start sm:w-[250px] md:w-[240px] lg:w-[260px]">
                 {/* Image Card Container */}
                 <Link href={productHref} className="block relative">
-                  <div className="w-full aspect-[4/5] rounded-3xl overflow-hidden bg-surface-container-low mb-5 shadow-sm group-hover:shadow-xl transition-all duration-500 relative">
+                  <div className="relative mb-5 aspect-[4/5] w-full overflow-hidden rounded-3xl border border-outline-variant/10 bg-[radial-gradient(circle_at_top,#fffdf7,transparent_45%),linear-gradient(180deg,#fffef9,#f5efe2)] shadow-sm transition-all duration-500 group-hover:shadow-xl">
                     {/* Subtle overlay on hover */}
                     <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10 pointer-events-none" />
                     
@@ -265,7 +265,7 @@ export default function ReviewsAndSimilar({ product }: { product?: Product | nul
                       <ResilientProductImage
                         sources={imageSources}
                         alt={item.name}
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        className="h-full w-full object-contain p-4 transition-transform duration-700 group-hover:scale-[1.03]"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-on-surface-variant/40 bg-surface-container">
@@ -277,11 +277,14 @@ export default function ReviewsAndSimilar({ product }: { product?: Product | nul
 
                 {/* Product Details */}
                 <div className="flex flex-col flex-grow px-1">
-                  <Link href={productHref} className="font-headline text-lg font-bold text-primary group-hover:text-secondary transition-colors line-clamp-1 mb-1">
+                  <Link href={productHref} className="mb-1 line-clamp-2 font-headline text-lg font-bold text-primary transition-colors group-hover:text-secondary">
                     {item.name}
                   </Link>
+                  <p className="line-clamp-2 min-h-[2.8rem] text-sm leading-5 text-on-surface-variant/80">
+                    {item.description || "Gram Ansh pantry essential with clean flavor and daily kitchen value."}
+                  </p>
                   
-                  <div className="flex items-baseline gap-2 mt-auto">
+                  <div className="mt-4 flex items-baseline gap-2">
                     <span className="font-headline text-[1.15rem] font-extrabold text-secondary tracking-tight">
                       {currencySymbol}{variant.price.toFixed(2)}
                     </span>

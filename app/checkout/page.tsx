@@ -511,7 +511,7 @@ export default function CheckoutPage() {
         key: razorpayRuntimeKey,
         amount: Number(data.amount || Math.round(total * 100)),
         currency: String(data.currency || "INR"),
-        name: settings.siteName || "Amila Gold",
+        name: settings.siteName || "Gram Ansh",
         description: `${checkoutItemCount} item${checkoutItemCount > 1 ? 's' : ''}`,
         order_id: orderId,
         prefill: {

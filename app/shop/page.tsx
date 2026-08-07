@@ -1,13 +1,13 @@
 import ShopPageClient from "./ShopPageClient";
 
 export const metadata = {
-  title: "Buy Organic Jaggery Online – Cubes, Peanut & Cashew Mixes",
+  title: "Shop Gram Ansh - Cold Press Oils & Natural Masalas",
   description:
-    "Shop our organic, chemical-free jaggery range online — plain, peanut mix, and cashew mix. Small-batch, traditional, delivered across India.",
+    "Shop the Gram Ansh range of cold press oils and natural masalas crafted for clean, flavourful everyday cooking.",
   keywords: [
-    "organic jaggery cubes",
-    "sugarcane jaggery online",
-    "desi gud price 1kg",
+    "gram ansh shop",
+    "cold press oil online",
+    "natural masala online",
   ],
 };
 

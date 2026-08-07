@@ -1,8 +1,8 @@
 import type { PublicHomepageData } from "@/app/lib/publicDataClient";
 
-export const HOMEPAGE_PUBLIC_CACHE_KEY = "amila_homepage_public_cache_v1";
-export const HOMEPAGE_RECOVERY_KEY = "amila_homepage_recovery_attempted_v1";
-export const HOMEPAGE_SOFT_REFETCH_KEY = "amila_homepage_soft_refetch_done_v1";
+export const HOMEPAGE_PUBLIC_CACHE_KEY = "gramansh_homepage_public_cache_v1";
+export const HOMEPAGE_RECOVERY_KEY = "gramansh_homepage_recovery_attempted_v1";
+export const HOMEPAGE_SOFT_REFETCH_KEY = "gramansh_homepage_soft_refetch_done_v1";
 
 const CACHE_VERSION = 1;
 const FRESH_TTL_MS = 10 * 60 * 1000;

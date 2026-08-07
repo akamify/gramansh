@@ -4,34 +4,34 @@ import React from "react";
 export default function WellnessPath() {
   return (
     <section className="mt-14 lg:mt-24 pb-8 border-b border-outline-variant/20">
-      <h3 className="font-headline text-4xl font-bold text-primary mb-3 lg:mb-12 text-center">The Amila Wellness Path</h3>
+      <h3 className="font-headline text-4xl font-bold text-primary mb-3 lg:mb-12 text-center">The Gram Ansh Quality Path</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         <div className="bg-surface-container-low p-4 lg:p-8 rounded-3xl space-y-4 hover:shadow-lg hover:-translate-y-1 transition-all">
           <span className="material-symbols-outlined text-3xl text-secondary">health_and_safety</span>
-          <h4 className="font-bold text-lg text-on-surface">Respiratory Detox</h4>
+          <h4 className="font-bold text-lg text-on-surface">Purity First</h4>
           <p className="text-on-surface-variant text-sm leading-relaxed font-body">
-            Naturally clears bronchial tracts and lungs, acting as a traditional remedy against environmental pollutants.
+            Our approach centers on clean ingredients and a preparation style that keeps the final product dependable for daily use.
           </p>
         </div>
         <div className="bg-surface-container-low p-4 lg:p-8 rounded-3xl space-y-4 hover:shadow-lg hover:-translate-y-1 transition-all">
           <span className="material-symbols-outlined text-3xl text-secondary">bolt</span>
-          <h4 className="font-bold text-lg text-on-surface">Sustained Vitality</h4>
+          <h4 className="font-bold text-lg text-on-surface">Balanced Flavor</h4>
           <p className="text-on-surface-variant text-sm leading-relaxed font-body">
-            Complex molecular structure ensures a slow release of energy, preventing the dreaded "sugar crash."
+            Gram Ansh products are made to feel rich, familiar, and naturally suited to everyday Indian cooking.
           </p>
         </div>
         <div className="bg-surface-container-low p-4 lg:p-8 rounded-3xl space-y-4 hover:shadow-lg hover:-translate-y-1 transition-all">
           <span className="material-symbols-outlined text-3xl text-secondary">vital_signs</span>
-          <h4 className="font-bold text-lg text-on-surface">Mineral Dense</h4>
+          <h4 className="font-bold text-lg text-on-surface">Natural Selection</h4>
           <p className="text-on-surface-variant text-sm leading-relaxed font-body">
-            Unlike white sugar, our jaggery retains iron, magnesium, and potassium vital for blood health.
+            We prioritize ingredients that align with a cleaner pantry and a more mindful kitchen routine.
           </p>
         </div>
         <div className="bg-surface-container-low p-4 lg:p-8 rounded-3xl space-y-4 hover:shadow-lg hover:-translate-y-1 transition-all">
           <span className="material-symbols-outlined text-3xl text-secondary">vital_signs</span>
-          <h4 className="font-bold text-lg text-on-surface">Digestive Aid</h4>
+          <h4 className="font-bold text-lg text-on-surface">Kitchen Trust</h4>
           <p className="text-on-surface-variant text-sm leading-relaxed font-body">
-            Activates digestive enzymes in the body, making it the perfect post-meal ritual for gut health.
+            The end result is simple: products you can reach for confidently, every single day.
           </p>
         </div>
       </div>

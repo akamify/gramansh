@@ -9,7 +9,7 @@ export default function ContactForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const supportEmail = 'support@amilagold.com';
+    const supportEmail = 'support@gramansh.com';
     const subject = `Contact from website: ${name || email}`;
     const body = `${message}\n\n---\nFrom: ${name || 'Anonymous'}\nEmail: ${email || ''}`;
     // Open user's mail client as a minimal fallback

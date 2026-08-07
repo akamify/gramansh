@@ -171,7 +171,7 @@ export default function SearchPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="w-full bg-surface-container-low border border-outline-variant/30 rounded-2xl px-6 py-4 text-sm focus:ring-4 focus:ring-secondary/10 font-body outline-none transition-all placeholder:text-on-surface-variant/50"
-              placeholder="Search jaggery, herbs..."
+              placeholder="Search oils, masalas..."
             />
             <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-secondary group-focus-within:scale-110 transition-transform">search</span>
           </div>
@@ -260,7 +260,7 @@ export default function SearchPage() {
             <div className="p-8 rounded-[2rem] bg-gradient-to-br from-secondary/10 to-transparent border border-secondary/20 group hover:bg-secondary/20 transition-all duration-500">
               <span className="material-symbols-outlined text-secondary text-4xl mb-4 icon-filled group-hover:rotate-12 transition-transform">verified_user</span>
               <h5 className="font-headline text-lg font-bold text-primary">Agrarian Grade</h5>
-              <p className="text-xs font-body text-on-surface-variant mt-2 leading-relaxed italic opacity-80">"Purity tested in small batches for uncompromised quality."</p>
+              <p className="text-xs font-body text-on-surface-variant mt-2 leading-relaxed italic opacity-80">&ldquo;Purity tested in small batches for uncompromised quality.&rdquo;</p>
             </div>
           </div>
         </aside>
@@ -496,7 +496,7 @@ export default function SearchPage() {
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     className="w-full bg-white border border-outline-variant/30 rounded-2xl px-5 py-4 text-sm font-body outline-none"
-                    placeholder="Search jaggery, herbs..."
+                    placeholder="Search oils, masalas..."
                   />
                 </section>
 

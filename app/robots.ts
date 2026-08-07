@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/cart", "/user/", "/search"],
     },
-    sitemap: "https://amilagold.com/sitemap.xml",
+    sitemap: "https://gramansh.com/sitemap.xml",
   };
 }

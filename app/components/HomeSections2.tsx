@@ -1,129 +1,137 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+
+import React, { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
-  subscribeNewsletter,
-} from "@/app/lib/apiClient";
+  ArrowRight,
+  Leaf,
+  Mail,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
+import { subscribeNewsletter } from "@/app/lib/apiClient";
 
-
-
-
-// ----------------------------------------------------------------------
-// 1. The Slow Craft Section
-// ----------------------------------------------------------------------
 function SlowCraftSection() {
   const steps = [
     {
       num: "01",
-      title: "Sustainable Harvest",
-      desc: "We source exclusively from heirloom cane fields that use bio-dynamic farming practices, preserving the earth for tomorrow.",
+      title: "Select clean ingredients",
+      desc: "We focus on kitchen staples that start with natural sourcing and careful raw selection.",
     },
     {
       num: "02",
-      title: "Gentle Reduction",
-      desc: "Juices are reduced in traditional copper vats over a slow fire to preserve enzyme integrity and deep, complex flavor notes.",
+      title: "Prepare in a slower rhythm",
+      desc: "Gram Ansh follows a more patient process so oils and masalas keep their depth and familiar aroma.",
     },
     {
       num: "03",
-      title: "Sun-Setting",
-      desc: "Natural cooling and setting processes ensure the unique, melt-in-your-mouth crystalline texture of Amila Gold.",
+      title: "Deliver everyday trust",
+      desc: "The final result is simple: products that feel dependable, pure, and ready for daily family cooking.",
     },
   ];
 
   return (
-    <section className="py-20 lg:py-32 bg-primary text-white overflow-hidden">
-      <div className="container mx-auto px-6 lg:px-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
-          {/* Enhanced Staggered Image Grid */}
-          <div className="order-2 lg:order-1 relative">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-white/5 rounded-full blur-3xl -z-10"></div>
+    <section className="relative overflow-hidden bg-[linear-gradient(180deg,#234b1d_0%,#163319_100%)] py-10 text-white lg:py-20">
+      <div className="pointer-events-none absolute -left-10 top-10 h-72 w-72 rounded-full bg-[#d79d44]/12 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-0 right-0 h-80 w-80 rounded-full bg-white/8 blur-3xl" />
 
-            <div className="grid grid-cols-2 gap-4 md:gap-6 items-center">
-              <div className="space-y-4 md:space-y-6">
-                <div className="h-64 md:h-80 rounded-2xl overflow-hidden shadow-2xl group">
+      <div className="container relative mx-auto px-4 lg:px-8">
+        <div className="grid items-center gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:gap-14">
+          <div className="relative">
+            <div className="grid grid-cols-2 gap-3 sm:gap-5">
+              <div className="space-y-3 sm:space-y-5">
+                <div className="overflow-hidden rounded-[28px] border border-white/10 bg-white/5 shadow-2xl">
                   <Image
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCeFZU1V0Q0g6matd53b4eGuvPJpsi51ntmAL8GqGhXx7gX1ONMZElOZIc9_CWVNe8lcV0YomSyncG5C5n85sQ22LoNmOwuMtT3MXF6uHWHr7T9Tek6v2xjFHa6ye6-GdV0oeeHGWEi1e2EEaNSP_yu3oVRdR0Gf_hHQlLkfZDaBYwM_dGyMn2FeWlDB9v0uPdZiV9cE66_p1RnDMQhy79E3TE3qnUtNOrDTW2-F7e7WkPcDfrBy-EJLQ1SXYvdQ59X8GDcHvySnSg"
-                    alt="Artisan pressing sugarcane"
-                    width={800}
-                    height={1000}
-                    loading="lazy"
-                    sizes="(max-width: 768px) 45vw, 22vw"
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    src="/banner1.png"
+                    alt="Gram Ansh banner detail"
+                    width={1200}
+                    height={900}
+                    className="h-52 w-full object-cover object-left sm:h-72"
                   />
                 </div>
-                <div className="h-48 md:h-56 rounded-2xl overflow-hidden shadow-2xl group">
-                  <Image
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-QCR-oUojk-vTpDynSAcSpNPVjQWJLDmmBqb7ILfJCSW_Moh6IXJB2W3k1XKBQ3q6JuSU8-saSR4Iep1LvmBDLB9fXwT_0pUKTJBhXjPKBbTqHI5K_Mn-27uhJzA4ACJbZmn9yyTRZZGXYoy539ejX35Annocovp-1rJEaoXhlwxQXleFv5fX7kxvo4zhoX19Sn6rSKeAOtfL-3J7COxVSrqZuFZHmLZbmE2-eHCi7cESeeJjaspD1Koi1VJLj_wd4N8Xkpe3xyo"
-                    alt="Copper vats boiling cane juice"
-                    width={800}
-                    height={1000}
-                    loading="lazy"
-                    sizes="(max-width: 768px) 45vw, 22vw"
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
+                <div className="rounded-[26px] border border-white/10 bg-white/8 p-5 backdrop-blur-sm">
+                  <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#d79d44] text-[#163319]">
+                    <ShieldCheck className="h-5 w-5" strokeWidth={2.4} />
+                  </div>
+                  <p className="mt-4 text-sm leading-7 text-white/78">
+                    Every Gram Ansh batch is shaped around real kitchen use, not
+                    just shelf appeal.
+                  </p>
                 </div>
               </div>
-              <div className="space-y-4 md:space-y-6 pt-16 md:pt-24">
-                <div className="h-48 md:h-56 rounded-2xl overflow-hidden shadow-2xl group">
-                  <Image
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBregqSUMJ0lt-VYUYK2XGTS4MnzTwsTQU5hYFZaV7CbZEyXwMjZH_AyH3LcnOD7DVipoNKr0g-TLdQ2OeRUFjjmdrmJKH6E2RzyVmIKndt4ad6bflv1MMX3nwCwhEUsMJDbM5_r2mVr_0TOrvDazmcD_BP8WhjX5dQ-vT0BnoioWC9BdfxxpkF09vYLwE9iys7QCvoSVVfLOriHCkiYSeD5RjAd8afFMfbYQs7zZhEu8EelS0kTSsw66ML8-io8Kp5kuqoQDGpz5c"
-                    alt="Jaggery crystals drying"
-                    width={800}
-                    height={1000}
-                    loading="lazy"
-                    sizes="(max-width: 768px) 45vw, 22vw"
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
+
+              <div className="space-y-3 pt-8 sm:space-y-5 sm:pt-14">
+                <div className="rounded-[26px] border border-white/10 bg-[linear-gradient(135deg,rgba(215,157,68,0.18)_0%,rgba(255,255,255,0.06)_100%)] p-5 backdrop-blur-sm">
+                  <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#8c5f22]">
+                    <Leaf className="h-5 w-5" strokeWidth={2.4} />
+                  </div>
+                  <p className="mt-4 text-sm leading-7 text-white/78">
+                    Natural intent, balanced flavour, and a slower method that
+                    keeps the product feeling grounded.
+                  </p>
                 </div>
-                <div className="h-64 md:h-80 rounded-2xl overflow-hidden shadow-2xl group">
+                <div className="overflow-hidden rounded-[28px] border border-white/10 bg-white/5 shadow-2xl">
                   <Image
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-2z1dIigqEBYNJuzA_d5P4XiqmlBm3djIsa_mIZxua1FX5wTpi_-_qbCaM85WuFX_NHUr56w868SFwcrRuinbc8xFDx7vB70lXBFpimL4GcJ3Hr2O-GvfuaoDbXzQLU4CrjDAtartUEP19NKHCbYgguWYHs9Y30jspsFgnwvgPah3TisIMry62W8JoUZhTILGObXhlsgDMUQ-sc43-dogRjNw8fiItJnfyUIDrHEo-qJSp9IJbWcRX8vUQNfC28mO9gM9fslOEvo"
-                    alt="Modern kitchen with jaggery"
-                    width={800}
+                    src="/gramansh.png"
+                    alt="Gram Ansh branding"
+                    width={1000}
                     height={1000}
-                    loading="lazy"
-                    sizes="(max-width: 768px) 45vw, 22vw"
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    className="h-56 w-full object-cover object-top sm:h-80"
                   />
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Timeline Text Content */}
-          <div className="order-1 lg:order-2">
-            <div className="mb-4 flex items-center gap-4">
-              <span className="h-[1px] w-10 bg-secondary"></span>
-              <span className="font-sans text-secondary uppercase tracking-[0.2em] text-xs font-bold">
-                Alchemy of the Soil
-              </span>
+          <div>
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/8 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#f5d18a]">
+              <Sparkles className="h-3.5 w-3.5" strokeWidth={2.3} />
+              Slow craft promise
             </div>
 
-            <h2 className="font-headline text-4xl md:text-5xl lg:text-6xl mb-12 text-white leading-tight">
-              The <span className="italic text-secondary">Slow</span> Craft
+            <h2 className="text-3xl font-black tracking-[-0.05em] text-white md:text-5xl">
+              A cleaner process for a more{" "}
+              <span className="text-[#f5d18a]">confident kitchen</span>
             </h2>
 
-            <div className="space-y-10 relative">
-              {/* Vertical connecting line */}
-              <div className="absolute left-[1.15rem] top-4 bottom-4 w-[2px] bg-white/20 -z-10 hidden md:block"></div>
+            <p className="mt-4 max-w-xl text-sm leading-7 text-white/74 md:text-base">
+              Gram Ansh is designed around products that feel trustworthy from
+              the moment they arrive in your pantry to the moment they are used
+              in daily cooking.
+            </p>
 
+            <div className="mt-8 space-y-4">
               {steps.map((step) => (
-                <div key={step.num} className="flex gap-6 md:gap-8 group">
-                  <div className="bg-primary mt-1">
-                    <span className="font-headline text-3xl md:text-4xl text-secondary/40 group-hover:text-secondary transition-colors duration-300 font-bold block bg-primary">
+                <div
+                  key={step.num}
+                  className="rounded-[26px] border border-white/10 bg-white/8 p-5 backdrop-blur-sm"
+                >
+                  <div className="flex gap-4">
+                    <div className="text-3xl font-black leading-none text-[#f5d18a]/80">
                       {step.num}
-                    </span>
-                  </div>
-                  <div>
-                    <h4 className="text-xl md:text-2xl font-bold text-white mb-3">
-                      {step.title}
-                    </h4>
-                    <p className="text-white/80 leading-relaxed font-light text-lg">
-                      {step.desc}
-                    </p>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-black text-white">
+                        {step.title}
+                      </h3>
+                      <p className="mt-2 text-sm leading-7 text-white/72">
+                        {step.desc}
+                      </p>
+                    </div>
                   </div>
                 </div>
               ))}
+            </div>
+
+            <div className="mt-8">
+              <Link
+                href="/shop"
+                className="inline-flex items-center gap-2 rounded-full bg-[linear-gradient(135deg,#d79d44_0%,#b87922_100%)] px-5 py-3 text-xs font-black uppercase tracking-[0.16em] text-white shadow-[0_16px_36px_rgba(122,67,18,0.28)] transition hover:brightness-105 active:scale-[0.98]"
+              >
+                Discover Gram Ansh
+                <ArrowRight className="h-4 w-4" strokeWidth={2.6} />
+              </Link>
             </div>
           </div>
         </div>
@@ -132,14 +140,6 @@ function SlowCraftSection() {
   );
 }
 
-// ----------------------------------------------------------------------
-// 2. Testimonials Section
-// ----------------------------------------------------------------------
-
-  
-// ----------------------------------------------------------------------
-// 3. Newsletter CTA Section
-// ----------------------------------------------------------------------
 function NewsletterSection() {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -149,18 +149,20 @@ function NewsletterSection() {
   const handleSubscribe = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const normalizedEmail = email.trim();
+
     if (!normalizedEmail) {
       setStatusType("error");
       setStatusMessage("Please enter your email.");
       return;
     }
+
     try {
       setIsSubmitting(true);
       setStatusMessage("");
       setStatusType("");
       await subscribeNewsletter(normalizedEmail, "homepage");
       setStatusType("success");
-      setStatusMessage("Welcome to the circle. Check your inbox.");
+      setStatusMessage("Welcome to Gram Ansh. Please check your inbox.");
       setEmail("");
     } catch (subscribeError) {
       setStatusType("error");
@@ -175,53 +177,59 @@ function NewsletterSection() {
   };
 
   return (
-    <section className="py-12 lg:py-24 bg-surface">
+    <section className="bg-[linear-gradient(180deg,#fffaf1_0%,#f2e7d3_100%)] py-10 lg:py-20">
       <div className="container mx-auto px-4 lg:px-8">
-        <div className="bg-secondary-container rounded-[2.5rem] px-6 py-16 md:p-24 text-center relative overflow-hidden shadow-2xl">
-          {/* Decorative Glowing Orbs adapted to theme */}
-          <div className="absolute top-0 left-0 w-72 h-72 bg-primary/10 blur-[100px] rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-secondary/10 blur-[100px] rounded-full translate-x-1/3 translate-y-1/3 pointer-events-none"></div>
+        <div className="relative overflow-hidden rounded-[34px] border border-[#dfd1b9] bg-[linear-gradient(135deg,#fffdf8_0%,#f7eedf_55%,#f0e1c4_100%)] px-5 py-12 shadow-[0_24px_70px_rgba(78,61,26,0.16)] lg:px-10 lg:py-16">
+          <div className="pointer-events-none absolute -left-10 top-0 h-64 w-64 rounded-full bg-[#2b5a23]/8 blur-3xl" />
+          <div className="pointer-events-none absolute bottom-0 right-0 h-72 w-72 rounded-full bg-[#d79d44]/12 blur-3xl" />
 
-          <div className="relative z-10 max-w-3xl mx-auto">
-            <h2 className="font-headline text-4xl md:text-5xl lg:text-6xl text-on-secondary-container mb-6 leading-tight">
-              Join the <span className="italic">Harvest</span> Circle
+          <div className="relative mx-auto max-w-4xl text-center">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#dfd1b9] bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-[#8c5f22]">
+              <Mail className="h-3.5 w-3.5 text-[#2b5a23]" strokeWidth={2.3} />
+              Join Gram Ansh updates
+            </div>
+
+            <h2 className="text-3xl font-black tracking-[-0.05em] text-[#24461e] md:text-5xl">
+              Stay close to the next{" "}
+              <span className="text-[#8c5f22]">Gram Ansh batch</span>
             </h2>
-            <p className="text-on-secondary-container/80 text-lg md:text-xl font-light mb-12 max-w-2xl mx-auto">
-              Receive seasonal updates on our harvest schedules, exclusive
-              early-batch releases, and stories straight from the soil.
+
+            <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-[#6f5a44] md:text-base">
+              Get product updates, pantry inspiration, and early access to
+              fresh releases from Gram Ansh.
             </p>
 
             <form
-              className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto"
+              className="mx-auto mt-8 flex max-w-2xl flex-col gap-3 sm:flex-row"
               onSubmit={handleSubscribe}
             >
               <input
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                placeholder="Enter your email address..."
-                className="flex-1 bg-surface-container-lowest border border-primary/10 rounded-full px-8 py-4 focus:ring-2 focus:ring-primary text-primary placeholder:text-on-surface-variant outline-none transition-all shadow-inner"
+                placeholder="Enter your email address"
+                className="h-14 flex-1 rounded-full border border-[#ddcfb7] bg-white px-6 text-sm font-medium text-[#2f261d] outline-none transition focus:border-[#2b5a23] focus:ring-4 focus:ring-[#dfe9cf] placeholder:text-[#9e8b73]"
               />
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-primary text-on-primary px-10 py-4 rounded-full font-bold uppercase tracking-widest text-sm hover:opacity-90 transition-all disabled:opacity-60 shadow-lg"
+                className="h-14 rounded-full bg-[linear-gradient(135deg,#2b5a23_0%,#4b742f_100%)] px-8 text-xs font-black uppercase tracking-[0.16em] text-white shadow-[0_16px_36px_rgba(43,90,35,0.22)] transition hover:brightness-105 disabled:opacity-60"
               >
                 {isSubmitting ? "Joining..." : "Subscribe"}
               </button>
             </form>
 
-            {statusMessage && (
+            {statusMessage ? (
               <div
-                className={`mt-6 inline-block px-4 py-2 rounded-full text-xs uppercase tracking-widest font-bold backdrop-blur-md ${
+                className={`mt-6 inline-flex rounded-full border px-4 py-2 text-[11px] font-black uppercase tracking-[0.14em] ${
                   statusType === "error"
-                    ? "bg-error/10 text-error border border-error/20"
-                    : "bg-primary/10 text-primary border border-primary/20"
+                    ? "border-[#e6b6ac] bg-[#fff1ee] text-[#9f3020]"
+                    : "border-[#cfe1c7] bg-[#eef6ea] text-[#2b5a23]"
                 }`}
               >
                 {statusMessage}
               </div>
-            )}
+            ) : null}
           </div>
         </div>
       </div>

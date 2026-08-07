@@ -17,7 +17,7 @@ export default function PromiseBanner() {
           Crafted for the modern home, rooted in ancient soil.
         </h2>
         <p className="font-body text-primary-fixed opacity-90 mb-12 text-sm md:text-base leading-relaxed max-w-xl mx-auto">
-          Every block of Amila Gold is a testament to the purity of the agrarian lifestyle. We never use sulfur, synthetic clarifiers, or artificial coloring.
+          Every Gram Ansh product reflects our ingredient-first approach. We focus on honest sourcing, clean preparation, and natural flavour without unnecessary additives.
         </p>
         <div className="flex justify-center gap-12 md:gap-20 border-t border-white/20 pt-10">
           <div className="text-center">
@@ -26,7 +26,7 @@ export default function PromiseBanner() {
           </div>
           <div className="text-center">
             <div className="text-3xl font-headline italic font-bold mb-2">100%</div>
-            <div className="text-[10px] md:text-xs uppercase tracking-widest font-bold opacity-80 text-secondary">Unrefined</div>
+            <div className="text-[10px] md:text-xs uppercase tracking-widest font-bold opacity-80 text-secondary">Natural</div>
           </div>
           <div className="text-center">
             <div className="text-3xl font-headline italic font-bold mb-2">Small</div>

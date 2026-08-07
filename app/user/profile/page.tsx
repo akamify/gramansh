@@ -320,7 +320,7 @@ export default function ProfilePage() {
           </div>
           <h3 className="font-headline text-3xl italic mb-4 max-w-sm">Your Gold Standard Protection</h3>
           <p className="font-body text-on-primary/80 text-sm leading-relaxed max-w-md mb-8">
-            At Amila Gold, we prioritize the purity of your data as much as the purity of our harvest. Your personal details are stored using state-of-the-art encryption protocols.
+            At Gram Ansh, we protect your personal information with the same care we bring to our products. Your details are handled using secure, modern protection standards.
           </p>
           <div className="flex flex-wrap items-center gap-6">
             <div className="flex items-center gap-2 text-secondary-container">

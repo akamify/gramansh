@@ -80,7 +80,7 @@ export default function ProductPageClient({ id, name }: { id: string; name?: str
   if (!product) return <ProductNotFound />;
 
   return (
-    <div className="pt-24 pb-12 px-2 sm:px-2 lg:px-12 max-w-screen-2xl mx-auto selection:bg-secondary-container selection:text-on-secondary-container">
+    <div className="mx-auto max-w-screen-2xl px-2 pb-12 pt-20 selection:bg-secondary-container selection:text-on-secondary-container sm:px-2 lg:px-8">
       <ProductHeader
         product={product}
         onStickyInfoChange={setStickyInfo}
@@ -123,7 +123,7 @@ export default function ProductPageClient({ id, name }: { id: string; name?: str
           onBuyNow={() => buyNowRef.current?.click()}
         />
       )}
-      <div className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-0">
+      <div className="mx-auto max-w-6xl px-3 sm:px-4 lg:px-0">
         <NutritionFacts product={product} />
         <WellnessPath />
         <ReviewsAndSimilar product={product} />

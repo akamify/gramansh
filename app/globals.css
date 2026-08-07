@@ -2,7 +2,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  /* ── Amila Gold: Primary (deep green) ── */
+  /* ── Gram Ansh: Primary (deep green) ── */
   --color-primary: #154212;
   --color-on-primary: #ffffff;
   --color-primary-container: #2d5a27;

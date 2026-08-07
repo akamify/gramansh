@@ -300,6 +300,7 @@ export function normalizeBackendProduct(input: unknown): Product {
         details: mapDetails(raw),
         ingredients: mapKeyValuePairs(raw.ingredients),
         nutritions: mapKeyValuePairs(raw.nutritions),
+        specifications: mapKeyValuePairs(raw.specifications),
     };
     return product;
 }

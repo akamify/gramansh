@@ -74,6 +74,7 @@ export default function AdminProductsPage() {
         key_highlights: p.key_highlights,
         ingredients: p.ingredients,
         nutritions: p.nutritions,
+        specifications: p.specifications,
         catagory_id: p.catagory_id,
         variants: p.variants,
         product_image: p.product_image || (p.image ? [p.image] : []),

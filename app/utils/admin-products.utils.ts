@@ -34,7 +34,7 @@ export type ProductItem = {
   }>;
   ingredients?: Array<{ key: string; value: string }>;
   nutritions?: Array<{ key: string; value: string }>;
-  key_highlights?: string[];
+  key_highlights?: Array<{ key: string; value: string }>;
   specifications?: Array<{ key: string; value: string }>;
 };
 

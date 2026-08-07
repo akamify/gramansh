@@ -280,37 +280,37 @@ export default function AdminSettings() {
     };
 
     const activeLogoPreview = logoPreviewUrl || settings.logoUrl || '';
-    const panelClass = 'bg-white border border-slate-200 rounded-3xl p-8';
+    const panelClass = 'rounded-[28px] border border-[#dccaa7] bg-[linear-gradient(180deg,#fffdf8_0%,#f8f1e3_100%)] p-8 shadow-[0_20px_46px_rgba(87,64,26,0.08)]';
     const inputClass =
-        'w-full rounded-xl px-4 py-3.5 transition-all focus:outline-none focus:ring-2 focus:ring-red-700/50 bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400';
+        'w-full rounded-2xl border border-[#d8c6a5] bg-[#fffaf1] px-4 py-3.5 text-slate-900 placeholder:text-[#8f7d5f] transition-all focus:outline-none focus:ring-2 focus:ring-[#b28a49]/35 focus:border-[#b28a49]';
     const passwordInputClass =
-        'w-full rounded-xl px-4 py-3 text-sm transition-all focus:outline-none focus:border-amber-500/50 bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400';
+        'w-full rounded-2xl border border-[#d8c6a5] bg-[#fffaf1] px-4 py-3 text-sm text-slate-900 placeholder:text-[#8f7d5f] transition-all focus:outline-none focus:border-[#b28a49] focus:ring-2 focus:ring-[#b28a49]/30';
 
     return (
         <div className="mx-auto flex max-w-7xl flex-col gap-10 px-4 py-10 text-slate-900">
             {/* Header Section */}
-            <header className="flex flex-col justify-between gap-6 border-b border-slate-200 pb-8 md:flex-row md:items-end">
+            <header className="flex flex-col justify-between gap-6 border-b border-[#dbcbaa] pb-8 md:flex-row md:items-end">
                 <div className="flex flex-col gap-1">
-                    <span className="flex items-center gap-2 text-red-700 font-bold text-xs tracking-[0.3em] uppercase">
-                        <div className="w-8 h-[2px] bg-red-700"></div> Configuration
+                    <span className="flex items-center gap-2 text-[#9a6a2f] font-bold text-xs tracking-[0.3em] uppercase">
+                        <div className="h-[2px] w-8 bg-[#9a6a2f]"></div> Gram Ansh Control
                     </span>
-                    <h2 className="text-5xl font-black tracking-tight text-slate-900 md:text-6xl">Site Settings</h2>
+                    <h2 className="text-5xl font-black tracking-tight text-[#234a22] md:text-6xl">Brand Settings</h2>
                 </div>
                 <div className="flex gap-4">
                      <button 
                         onClick={onSave} 
                         disabled={loading || saving || !dirty} 
-                        className="group flex items-center gap-2 bg-white text-black px-8 py-4 rounded-full font-bold transition-all hover:bg-red-700 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed shadow-xl shadow-white/5"
+                        className="group flex items-center gap-2 rounded-full bg-[linear-gradient(135deg,#234a22,#3a6a2e)] px-8 py-4 font-bold text-white shadow-[0_18px_36px_rgba(35,74,34,0.22)] transition-all hover:translate-y-[-1px] hover:shadow-[0_24px_40px_rgba(35,74,34,0.28)] disabled:cursor-not-allowed disabled:opacity-30"
                     >
                         <Save size={18} className={saving ? "" : "group-hover:scale-110 transition-transform"} />
-                        {saving ? 'Processing...' : 'Save Configuration'}
+                        {saving ? 'Processing...' : 'Save Settings'}
                     </button>
                 </div>
             </header>
 
             {/* Notification Area */}
             {(error || message) && (
-                <div className={`animate-in slide-in-from-top-4 flex items-center gap-3 rounded-xl border px-6 py-4 fade-in duration-300 ${error ? 'border-red-500/20 bg-red-500/10 text-red-600' : 'border-emerald-500/20 bg-emerald-500/10 text-emerald-700'}`}>
+                <div className={`animate-in slide-in-from-top-4 flex items-center gap-3 rounded-2xl border px-6 py-4 fade-in duration-300 ${error ? 'border-[#b35a4a]/25 bg-[#fff1ee] text-[#a34b3d]' : 'border-[#4f8a48]/25 bg-[#edf6e9] text-[#2f6e2e]'}`}>
                     {error ? <AlertCircle size={20} /> : <CheckCircle2 size={20} />}
                     <p className="text-sm font-medium">{error || message}</p>
                     <button className="ml-auto opacity-50 hover:opacity-100" onClick={() => { setError(''); setMessage(''); }}>
@@ -326,13 +326,13 @@ export default function AdminSettings() {
                     {/* Branding Section */}
                     <section className={`${panelClass} backdrop-blur-sm`}>
                         <div className="flex items-center gap-3 mb-8">
-                            <div className="p-2 bg-red/20 rounded-lg text-red-700"><Globe size={24} /></div>
-                            <h3 className="text-2xl font-bold tracking-tight text-slate-900">Identity & Branding</h3>
+                            <div className="rounded-xl bg-[#efe1c2] p-2 text-[#8a5a24]"><Globe size={24} /></div>
+                            <h3 className="text-2xl font-bold tracking-tight text-[#234a22]">Identity & Branding</h3>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                             <InputWrapper label="Store Name">
-                                <input autoComplete="off" value={form.siteName} onChange={(e) => updateField('siteName', e.target.value)} className={inputClass} placeholder="e.g. Pure Fire" />
+                                <input autoComplete="off" value={form.siteName} onChange={(e) => updateField('siteName', e.target.value)} className={inputClass} placeholder="e.g. Gram Ansh" />
                             </InputWrapper>
                             <InputWrapper label="Currency Symbol">
                                 <input autoComplete="off" value={form.currencySymbol} onChange={(e) => updateField('currencySymbol', e.target.value)} className={inputClass} />
@@ -363,29 +363,29 @@ export default function AdminSettings() {
                         </div>
 
                         {/* Logo Upload Box */}
-                        <div className="mt-10 rounded-2xl border border-dashed border-slate-300 bg-slate-100 p-6">
+                        <div className="mt-10 rounded-[24px] border border-dashed border-[#d8c6a5] bg-[linear-gradient(135deg,#fff8ec,#f5ead6)] p-6">
                              <div className="flex flex-col md:flex-row gap-8 items-center">
                                 <div className="relative group">
-                                    <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-2xl border border-slate-300 bg-white transition-transform group-hover:scale-105">
+                                    <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-2xl border border-[#d8c6a5] bg-white transition-transform group-hover:scale-105">
                                         {activeLogoPreview ? (
                                             <Image src={activeLogoPreview} alt="logo preview" width={100} height={100} unoptimized className="object-contain p-2" />
                                         ) : (
                                             <UploadCloud className="text-slate-400" size={32} />
                                         )}
                                     </div>
-                                    {activeLogoPreview && <div className="absolute -right-2 -top-2 rounded-full border-2 border-white bg-emerald-500 p-1"><CheckCircle2 size={12} /></div>}
+                                    {activeLogoPreview && <div className="absolute -right-2 -top-2 rounded-full border-2 border-white bg-[#4f8a48] p-1 text-white"><CheckCircle2 size={12} /></div>}
                                 </div>
                                 <div className="flex-1 flex flex-col gap-4">
                                     <div className="text-center md:text-left">
-                                        <h4 className="font-bold text-slate-900">Brand Mark</h4>
+                                        <h4 className="font-bold text-[#234a22]">Brand Mark</h4>
                                         <p className="mt-1 text-xs text-slate-500">Recommended size 512x512px. Transparent PNG preferred.</p>
                                     </div>
                                     <div className="flex flex-wrap gap-3">
                                         <input key={logoInputKey} type="file" accept="image/*" id="logo-upload" className="hidden" onChange={(e) => setLogoFile(e.target.files?.[0] || null)} />
-                                        <label htmlFor="logo-upload" className="cursor-pointer rounded-full border border-slate-300 bg-white px-6 py-2.5 text-xs font-bold text-slate-800 transition-all hover:bg-slate-100">
+                                        <label htmlFor="logo-upload" className="cursor-pointer rounded-full border border-[#d8c6a5] bg-white px-6 py-2.5 text-xs font-bold text-[#6d5a3f] transition-all hover:bg-[#f8efde]">
                                             Choose Image
                                         </label>
-                                        <button onClick={onUploadLogo} disabled={uploadingLogo || !logoFile} className="bg-red-700 text-white px-6 py-2.5 rounded-full text-xs font-bold transition-all hover:shadow-lg hover:shadow-red-700/20 disabled:opacity-30">
+                                        <button onClick={onUploadLogo} disabled={uploadingLogo || !logoFile} className="rounded-full bg-[linear-gradient(135deg,#234a22,#3a6a2e)] px-6 py-2.5 text-xs font-bold text-white transition-all hover:shadow-lg hover:shadow-[#234a22]/20 disabled:opacity-30">
                                             {uploadingLogo ? 'Uploading...' : 'Update Logo'}
                                         </button>
                                     </div>
@@ -397,8 +397,8 @@ export default function AdminSettings() {
                     {/* Social Media Section */}
                     <section className={`${panelClass} backdrop-blur-sm`}>
                         <div className="flex items-center gap-3 mb-8">
-                            <div className="p-2 bg-blue-500/20 rounded-lg text-blue-400"><Share2 size={24} /></div>
-                            <h3 className="text-2xl font-bold tracking-tight text-slate-900">Social Connectivity</h3>
+                            <div className="rounded-xl bg-[#e8f1de] p-2 text-[#3d7b35]"><Share2 size={24} /></div>
+                            <h3 className="text-2xl font-bold tracking-tight text-[#234a22]">Social Connectivity</h3>
                         </div>
                         <div className="grid grid-cols-1 gap-6">
                             <InputWrapper label="Instagram Profile URL">
@@ -418,29 +418,29 @@ export default function AdminSettings() {
                 <div className="lg:col-span-4 flex flex-col gap-8">
                     
                     {/* Security Card */}
-                    <section className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-8">
+                    <section className="relative overflow-hidden rounded-[28px] border border-[#dccaa7] bg-[linear-gradient(180deg,#fffdf8_0%,#f7efdf_100%)] p-8 shadow-[0_20px_46px_rgba(87,64,26,0.08)]">
                          <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none rotate-12">
                             <ShieldCheck size={120} />
                          </div>
                         <div className="flex items-center gap-3 mb-6 relative z-10">
-                            <div className="p-2 bg-amber-500/20 rounded-lg text-amber-400"><ShieldCheck size={20} /></div>
-                            <h3 className="text-xl font-bold tracking-tight text-slate-900">Security & Access</h3>
+                            <div className="rounded-xl bg-[#efe1c2] p-2 text-[#9a6a2f]"><ShieldCheck size={20} /></div>
+                            <h3 className="text-xl font-bold tracking-tight text-[#234a22]">Security & Access</h3>
                         </div>
                         <div className="flex flex-col gap-4 relative z-10">
                             <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} placeholder="Current Password" className={passwordInputClass} />
                             <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New Password" className={passwordInputClass} />
-                            <button onClick={onResetPassword} disabled={resettingPassword || !currentPassword || !newPassword} className="w-full rounded-xl border border-slate-300 bg-slate-100 py-3 text-xs font-bold text-slate-800 transition-all hover:bg-slate-200 disabled:opacity-20">
+                            <button onClick={onResetPassword} disabled={resettingPassword || !currentPassword || !newPassword} className="w-full rounded-2xl border border-[#d8c6a5] bg-[#f8efde] py-3 text-xs font-bold text-[#6d5a3f] transition-all hover:bg-[#efe1c2] disabled:opacity-20">
                                 {resettingPassword ? 'Processing...' : 'Change Password'}
                             </button>
                             <div className="my-2 h-[1px] bg-slate-200"></div>
-                            <button onClick={onLogout} className="w-full bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white py-3 rounded-xl text-xs font-bold border border-red-500/20 transition-all flex items-center justify-center gap-2">
+                            <button onClick={onLogout} className="flex w-full items-center justify-center gap-2 rounded-2xl border border-[#b35a4a]/20 bg-[#fff1ee] py-3 text-xs font-bold text-[#a34b3d] transition-all hover:bg-[#b35a4a] hover:text-white">
                                 <LogOut size={14} /> Sign Out Session
                             </button>
                         </div>
                     </section>
 
                     {/* Quick Preview Card */}
-                    <section className="bg-red-700 rounded-3xl p-8 text-white shadow-2xl shadow-red-700/20 group">
+                    <section className="group rounded-[28px] bg-[linear-gradient(135deg,#234a22,#3a6a2e_55%,#9a6a2f)] p-8 text-white shadow-[0_24px_54px_rgba(35,74,34,0.26)]">
                         <h3 className="text-xl font-bold tracking-tight mb-6 flex justify-between items-center">
                             Live Preview
                             <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
@@ -477,7 +477,7 @@ export default function AdminSettings() {
             
             {/* Bottom Floating Action (Optional if needed) */}
             <div className="fixed bottom-8 right-8 z-50 md:hidden">
-                 <button onClick={onSave} disabled={loading || saving || !dirty} className="bg-red-700 text-white p-5 rounded-full shadow-2xl disabled:opacity-50">
+                 <button onClick={onSave} disabled={loading || saving || !dirty} className="rounded-full bg-[linear-gradient(135deg,#234a22,#3a6a2e)] p-5 text-white shadow-2xl disabled:opacity-50">
                     <Save size={24} />
                  </button>
             </div>

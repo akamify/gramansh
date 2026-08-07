@@ -4,7 +4,7 @@ import { useSiteSettings } from '@/app/context/SiteSettingsContext';
 
 export default function ContactPage() {
   const { settings } = useSiteSettings();
-  const supportEmail = settings.companyEmail || 'support@amilagold.com';
+  const supportEmail = settings.companyEmail || 'support@gramansh.com';
   const supportPhone = settings.companyPhone || '+91 12345 67890';
   const supportAddress = settings.companyAddress || 'India';
 
