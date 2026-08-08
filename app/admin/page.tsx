@@ -72,7 +72,7 @@ export default function AdminDashboard() {
    const [, setError] = useState('');
    const [range, setRange] = useState<TrendRange>('weekly');
    const { settings } = useSiteSettings();
-   const currency = settings.currencySymbol || '$';
+   const currency = settings.currencySymbol || '₹';
 
    const loadDashboard = async () => {
       try {

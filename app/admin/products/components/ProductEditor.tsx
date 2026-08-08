@@ -125,7 +125,7 @@ export default function ProductEditor({
   onError,
 }: Props) {
   const { settings } = useSiteSettings();
-  const currency = settings.currencySymbol || '$';
+  const currency = settings.currencySymbol || '₹';
 
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -257,7 +257,7 @@ export default function ProductEditor({
               weight,
               weightUnit,
               price: String(v.price || ''),
-              discountedPrice: String(v.originalPrice || v.selling_price || ''),
+              discountedPrice: String(v.selling_price || v.originalPrice || v.price || ''),
               stock: Number(v.stock || 0),
               stockLocked: Number(v.stock || 0) <= 0,
               images: [],
@@ -493,16 +493,31 @@ export default function ProductEditor({
       form.append('nutritions', JSON.stringify(nutritions.filter((n) => n.key.trim() && n.value.trim())));
       form.append('specification', JSON.stringify(specifications.filter((item) => item.key.trim() && item.value.trim())));
 
-      const backendVariants = variants.map((v) => ({
-        label: v.weight.trim() + v.weightUnit,
-        stock: Number(v.stock || 0),
-        price: Number(v.price || 0),
-        originalPrice: Number(v.discountedPrice || 0) || Number(v.price || 0),
-        selling_price: Number(v.discountedPrice || 0) || Number(v.price || 0),
-        image: v.images.length > 0 ? '' : (v.existingImages?.[0] || ''),
-        existingImages: v.images.length > 0 ? [] : (v.existingImages || []),
-      }));
+      const backendVariants = variants.map((v) => {
+        const originalPrice = Number(v.price || 0);
+        const sellingPrice = Number(v.discountedPrice || 0) || originalPrice;
+
+        return {
+          label: v.weight.trim() + v.weightUnit,
+          stock: Number(v.stock || 0),
+          price: originalPrice,
+          originalPrice,
+          selling_price: sellingPrice,
+          image: v.images.length > 0 ? '' : (v.existingImages?.[0] || ''),
+          existingImages: v.images.length > 0 ? [] : (v.existingImages || []),
+        };
+      });
       form.append('variants', JSON.stringify(backendVariants));
+
+      const primaryVariant = backendVariants[0];
+      if (primaryVariant) {
+        form.append('price', String(primaryVariant.price || 0));
+        form.append('selling_price', String(primaryVariant.selling_price || primaryVariant.price || 0));
+        form.append(
+          'quantity',
+          String(backendVariants.reduce((sum, variant) => sum + Number(variant.stock || 0), 0))
+        );
+      }
 
       variants.forEach((v, variantIdx) => {
         v.images.forEach((file) => {

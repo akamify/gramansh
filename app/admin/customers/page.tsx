@@ -37,7 +37,7 @@ const statusTone = (status: string) => {
 
 export default function CustomersManagement() {
     const { settings } = useSiteSettings();
-    const currency = settings.currencySymbol || '$';
+    const currency = settings.currencySymbol || '₹';
 
     const [overview, setOverview] = useState<AdminCustomerOverview | null>(null);
     const [isLoading, setIsLoading] = useState(true);

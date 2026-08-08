@@ -34,7 +34,7 @@ const defaultSettings: SiteSettings = {
         process.env.NEXT_PUBLIC_EMAIL_FOOTER_DESCRIPTION ||
         'This is an automated message from StreetRiot commerce engine.',
     logoUrl: process.env.NEXT_PUBLIC_BRAND_LOGO_URL || process.env.NEXT_PUBLIC_LOGO_URL || '',
-    currencySymbol: process.env.NEXT_PUBLIC_CURRENCY || '$',
+    currencySymbol: process.env.NEXT_PUBLIC_CURRENCY || '₹',
     instagramUrl: process.env.NEXT_PUBLIC_INSTAGRAM_URL || '',
     instagramHandle: process.env.NEXT_PUBLIC_INSTAGRAM_HANDLE || 'kinetic_riot',
     instagramGallery: defaultInstagramGallery,

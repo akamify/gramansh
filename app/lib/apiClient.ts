@@ -779,9 +779,10 @@ export async function removeWishlistProduct(productId: number) {
 
 export async function fetchCartItems() {
     const cart_id = getCartId();
+    const email = getUserEmail();
     const data = await request('/user/get-user-cart', {
         method: 'POST',
-        body: JSON.stringify({ cart_id }),
+        body: JSON.stringify({ cart_id, email }),
     });
     if (typeof data.cart_id === 'string' && data.cart_id) setCartId(data.cart_id);
     return Array.isArray(data.items) ? data.items : [];
@@ -1438,7 +1439,7 @@ const mapSiteSettings = (value: unknown): SiteSettings => {
         ),
         logoUrl: decodeHtmlEntities(row.logoUrl || ''),
         logoPublicId: row.logoPublicId ? String(row.logoPublicId) : undefined,
-        currencySymbol: decodeHtmlEntities(row.currencySymbol || '$'),
+        currencySymbol: decodeHtmlEntities(row.currencySymbol || '₹'),
         instagramUrl: decodeHtmlEntities(row.instagramUrl || ''),
         instagramHandle: decodeHtmlEntities(instagramHandle),
         instagramGallery,

@@ -63,7 +63,7 @@ const StatCard = ({ label, val, trend, trendValue, reversed, delay }: any) => {
 
 export default function AdminAnalytics() {
   const { settings } = useSiteSettings();
-  const currency = settings.currencySymbol || '$';
+  const currency = settings.currencySymbol || '₹';
 
   const [data, setData] = useState<AdminAnalyticsOverview | null>(null);
   const [isLoading, setIsLoading] = useState(true);

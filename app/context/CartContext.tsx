@@ -254,6 +254,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const clearCart = async () => {
+    const previousItems = items;
     setIsSyncing(true);
     setSyncError('');
 
@@ -266,7 +267,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       }
     } catch {
       setSyncError('Could not clear cart.');
-      setItems([]);
+      setItems(previousItems);
     } finally {
       setIsSyncing(false);
     }

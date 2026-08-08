@@ -23,7 +23,7 @@ export default function AdminProductsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { settings } = useSiteSettings();
-  const currency = settings.currencySymbol || '$';
+  const currency = settings.currencySymbol || '₹';
 
   const [products, setProducts] = useState<ProductItem[]>([]);
   const [categories, setCategories] = useState<CategoryNode[]>([]);
@@ -115,8 +115,15 @@ export default function AdminProductsPage() {
       const numericId = Number(id);
       if (Number.isFinite(numericId)) {
         const product = products.find((p) => p.product_id === numericId) || null;
-        setEditingProduct(product);
-        setIsEditorOpen(true);
+        if (product) {
+          setEditingProduct(product);
+          setIsEditorOpen(true);
+          setError('');
+        } else {
+          setEditingProduct(null);
+          setIsEditorOpen(false);
+          setError(`Product ${numericId} could not be loaded for editing.`);
+        }
       }
     }
   }, [searchParams, loading, products]);

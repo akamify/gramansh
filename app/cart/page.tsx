@@ -6,9 +6,10 @@ import { useCart } from "@/app/context/CartContext";
 import { useSiteSettings } from "@/app/context/SiteSettingsContext";
 import {
   fetchBackendProductById,
+  fetchBackendProducts,
   matchVariantByCartSize,
 } from "@/app/lib/backendProducts";
-import { createProductHref } from "@/app/data/products";
+import { createProductHref, getProductImageSources, type Product } from "@/app/data/products";
 import ConfirmModal from "@/app/components/ConfirmModal";
 
 const SHIPPING = 0;
@@ -24,6 +25,36 @@ type CartItemBase = {
   image?: string;
   collection?: string;
 };
+
+function useAnimatedNumber(value: number, durationMs = 280) {
+  const [displayValue, setDisplayValue] = React.useState(value);
+
+  React.useEffect(() => {
+    if (displayValue === value) return;
+
+    const startValue = displayValue;
+    const startTime = performance.now();
+    let frameId = 0;
+
+    const update = (now: number) => {
+      const progress = Math.min(1, (now - startTime) / durationMs);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const nextValue = startValue + (value - startValue) * eased;
+      setDisplayValue(progress >= 1 ? value : nextValue);
+      if (progress < 1) frameId = window.requestAnimationFrame(update);
+    };
+
+    frameId = window.requestAnimationFrame(update);
+    return () => window.cancelAnimationFrame(frameId);
+  }, [value, durationMs, displayValue]);
+
+  return displayValue;
+}
+
+function getDiscountPercent(originalPrice: number | undefined, price: number) {
+  if (!originalPrice || originalPrice <= price) return 0;
+  return Math.max(1, Math.round(((originalPrice - price) / originalPrice) * 100));
+}
 
 function normalizeImageSources(
   sources: Array<string | null | undefined>,
@@ -45,11 +76,13 @@ function CartItemImage({
   fallbackSources,
   alt,
   isOutOfStock,
+  priority = false,
 }: {
   sources: string[];
   fallbackSources: string[];
   alt: string;
   isOutOfStock: boolean;
+  priority?: boolean;
 }) {
   const normalizedSources = React.useMemo(
     () => normalizeImageSources(sources),
@@ -88,7 +121,7 @@ function CartItemImage({
 
     const fallbackDelay = window.setTimeout(() => {
       setShowFallback(true);
-    }, 1200);
+    }, 350);
 
     return () => {
       window.clearTimeout(fallbackDelay);
@@ -106,7 +139,7 @@ function CartItemImage({
         setShowFallback(true);
         setLoaded(false);
       }
-    }, 7000);
+    }, 1800);
 
     return () => {
       window.clearTimeout(slowLoadTimer);
@@ -136,7 +169,7 @@ function CartItemImage({
           key={`${showFallback ? "fallback" : "source"}-${activeSource}`}
           src={activeSource}
           alt={alt}
-          loading="eager"
+          loading={priority ? "eager" : "lazy"}
           decoding="async"
           className={`h-full w-full object-cover transition-all duration-500 ${
             loaded || showFallback ? "opacity-100" : "opacity-0"
@@ -207,7 +240,7 @@ function CartSkeletonCard() {
 
 function CartPageSkeleton() {
   return (
-    <main className="mx-auto min-h-screen max-w-[1600px] bg-surface px-3 pt-[7.5rem] pb-2 font-['Poppins'] sm:px-8 lg:px-16">
+    <main className="mx-auto min-h-screen max-w-[1600px] bg-surface px-4 pt-6 pb-8 sm:px-6 sm:pt-8 lg:px-12 lg:pt-10 xl:px-16">
       <div className="flex flex-col items-start gap-12 lg:grid lg:grid-cols-12">
         <section className="w-full space-y-10 lg:col-span-8">
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
@@ -267,7 +300,16 @@ function CartPageSkeleton() {
 }
 
 export default function CartPage() {
-  const { items, removeItem, updateQty, itemCount, isHydrating } = useCart();
+  const {
+    addItem,
+    items,
+    removeItem,
+    updateQty,
+    itemCount,
+    isHydrating,
+    syncError,
+    refreshCart,
+  } = useCart();
   const { settings } = useSiteSettings();
 
   const currencySymbol = settings.currencySymbol || "Rs.";
@@ -281,8 +323,14 @@ export default function CartPage() {
   const [imageSourcesByItem, setImageSourcesByItem] = React.useState<
     Record<string, string[]>
   >({});
+  const [pricingByItem, setPricingByItem] = React.useState<
+    Record<string, { price: number; originalPrice?: number }>
+  >({});
   const [isStockLoading, setIsStockLoading] = React.useState(false);
   const [stockError, setStockError] = React.useState("");
+  const [recommendations, setRecommendations] = React.useState<Product[]>([]);
+  const [recommendationsLoading, setRecommendationsLoading] = React.useState(false);
+  const [pendingRecommendationId, setPendingRecommendationId] = React.useState<number | null>(null);
   const [pendingItemKey, setPendingItemKey] = React.useState("");
   const [removeTarget, setRemoveTarget] = React.useState<{
     id: number;
@@ -301,6 +349,7 @@ export default function CartPage() {
       setStockByItem({});
       setProductHrefByItem({});
       setImageSourcesByItem({});
+      setPricingByItem({});
       setStockError("");
       return;
     }
@@ -328,6 +377,7 @@ export default function CartPage() {
       const nextStock: Record<string, number> = {};
       const nextHrefs: Record<string, string> = {};
       const nextImages: Record<string, string[]> = {};
+      const nextPricing: Record<string, { price: number; originalPrice?: number }> = {};
 
       items.forEach((item) => {
         const key = `${item.id}|${item.size}|${item.color}`;
@@ -353,20 +403,34 @@ export default function CartPage() {
           ...(product?.images || []),
           product?.image,
         ]);
+
+        nextPricing[key] = {
+          price: typeof variant?.price === "number" && Number.isFinite(variant.price)
+            ? variant.price
+            : item.price,
+          originalPrice:
+            typeof variant?.originalPrice === "number" && Number.isFinite(variant.originalPrice)
+              ? variant.originalPrice
+              : product?.originalPrice,
+        };
       });
 
       setStockByItem(nextStock);
       setProductHrefByItem(nextHrefs);
       setImageSourcesByItem(nextImages);
+      setPricingByItem(nextPricing);
     } catch {
       const fallbackImages: Record<string, string[]> = {};
+      const fallbackPricing: Record<string, { price: number; originalPrice?: number }> = {};
 
       items.forEach((item) => {
         const key = `${item.id}|${item.size}|${item.color}`;
         fallbackImages[key] = normalizeImageSources([item.image]);
+        fallbackPricing[key] = { price: item.price };
       });
 
       setImageSourcesByItem(fallbackImages);
+      setPricingByItem(fallbackPricing);
       setStockError("Stock status could not be refreshed. Please try again.");
     } finally {
       setIsStockLoading(false);
@@ -376,6 +440,55 @@ export default function CartPage() {
   React.useEffect(() => {
     loadStock();
   }, [itemIdentityKey, loadStock]);
+
+  React.useEffect(() => {
+    let cancelled = false;
+
+    async function loadRecommendations() {
+      if (!items.length) {
+        setRecommendations([]);
+        return;
+      }
+
+      setRecommendationsLoading(true);
+      try {
+        const cartProductIds = new Set(items.map((item) => item.id));
+        const cartProducts = await Promise.all(
+          [...cartProductIds].map((productId) => fetchBackendProductById(productId)),
+        );
+        const preferredCategories = new Set(
+          cartProducts
+            .map((product) => String(product?.category || "").trim().toLowerCase())
+            .filter(Boolean),
+        );
+
+        const allProducts = await fetchBackendProducts();
+        if (cancelled) return;
+
+        setRecommendations(() => {
+          return allProducts
+            .filter((product) => product.quantity > 0 && !cartProductIds.has(product.id))
+            .sort((a, b) => {
+              const aCategory = preferredCategories.has(String(a.category || "").trim().toLowerCase()) ? 1 : 0;
+              const bCategory = preferredCategories.has(String(b.category || "").trim().toLowerCase()) ? 1 : 0;
+              if (aCategory !== bCategory) return bCategory - aCategory;
+              return b.quantity - a.quantity;
+            })
+            .slice(0, 8);
+        });
+      } catch {
+        if (!cancelled) setRecommendations([]);
+      } finally {
+        if (!cancelled) setRecommendationsLoading(false);
+      }
+    }
+
+    void loadRecommendations();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [itemIdentityKey, items]);
 
   const handleQuantityChange = async (
     item: { id: number; size: string; color: string; qty: number },
@@ -446,6 +559,9 @@ export default function CartPage() {
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.qty, 0);
   const total = subtotal + SHIPPING;
+  const animatedSubtotal = useAnimatedNumber(subtotal);
+  const animatedTotal = useAnimatedNumber(total);
+  const animatedItemCount = useAnimatedNumber(itemCount, 220);
 
   if (isHydrating) {
     return <CartPageSkeleton />;
@@ -453,7 +569,7 @@ export default function CartPage() {
 
   if (!itemCount) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-surface px-6 pt-3 pb-2 font-['Poppins']">
+      <main className="flex min-h-screen items-center justify-center bg-surface px-6 pt-8 pb-10">
         <div className="max-w-md animate-fade-in text-center">
           <div className="relative mb-8 inline-block">
             <div className="absolute inset-0 rounded-full bg-primary/5 blur-3xl" />
@@ -462,7 +578,7 @@ export default function CartPage() {
             </span>
           </div>
 
-          <h1 className="mb-4 text-4xl font-bold tracking-tight text-primary">
+          <h1 className="font-headline mb-4 text-4xl font-bold tracking-tight text-primary sm:text-5xl">
             Your cart is empty
           </h1>
 
@@ -484,34 +600,63 @@ export default function CartPage() {
   }
 
   return (
-    <main className="mx-auto min-h-screen max-w-[1600px] bg-surface px-3 pt-[7.5rem] pb-2 font-['Poppins'] sm:px-8 lg:px-16">
-      <div className="flex flex-col items-start gap-12 lg:grid lg:grid-cols-12">
-        <section className="w-full space-y-10 lg:col-span-8">
-          <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-            <div>
-              <h1 className="text-4xl font-bold tracking-tighter text-primary md:text-5xl">
-                Your Bag
-              </h1>
+    <main className="mx-auto min-h-screen max-w-[1600px] bg-surface px-4 pt-6 pb-10 sm:px-6 sm:pt-8 lg:px-12 lg:pt-10 xl:px-16">
+      <section className="mb-6 rounded-[0.75rem] border border-primary/10 bg-gradient-to-r from-primary/[0.04] via-white to-secondary/[0.06] px-5 py-5 shadow-[0_18px_60px_rgba(21,66,18,0.06)] sm:px-7 sm:py-6">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div className="space-y-3">
+            <span className="inline-flex w-fit items-center gap-2 rounded-full border border-primary/10 bg-white/80 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.24em] text-primary/75">
+              <span className="material-symbols-outlined text-sm">shopping_bag</span>
+              Cart
+            </span>
 
-              <p className="mt-2 font-medium tracking-wide text-on-surface-variant/60">
-                {itemCount} {itemCount === 1 ? "item" : "items"} selected for
-                checkout
+            <div>
+              <h1 className="font-headline text-4xl font-bold tracking-[-0.04em] text-primary sm:text-5xl lg:text-6xl">
+                Your Cart
+              </h1>
+              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-on-surface-variant/75 sm:text-base">
+                Review your items, adjust quantities, and continue to checkout with confidence.
               </p>
             </div>
+          </div>
 
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="rounded-full border border-primary/10 bg-white/80 px-4 py-2 text-sm font-semibold text-on-surface-variant">
+              {Math.round(animatedItemCount)} {itemCount === 1 ? "item" : "items"} selected
+            </div>
             <Link
               href="/shop"
-              className="flex items-center gap-2 text-sm font-bold text-primary underline-offset-8 hover:underline"
+              className="inline-flex min-h-11 items-center gap-2 rounded-full bg-primary px-5 text-sm font-bold text-white transition-all hover:bg-primary-container hover:shadow-lg hover:shadow-primary/20"
             >
               <span className="material-symbols-outlined text-base">
                 add_shopping_cart
               </span>
-              Add more items
+              Continue shopping
             </Link>
-          </header>
+          </div>
+        </div>
+      </section>
+
+      <div className="flex flex-col gap-8 lg:grid lg:grid-cols-12 lg:items-start">
+        <section className="w-full space-y-10 lg:col-span-8">
+          {syncError ? (
+            <div className="flex flex-col gap-3 rounded-[0.5rem] border border-error/20 bg-error/[0.05] p-4 text-sm text-error sm:flex-row sm:items-center sm:justify-between">
+              <p className="font-medium">
+                {syncError}
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  void refreshCart();
+                }}
+                className="inline-flex min-h-11 items-center justify-center rounded-xl border border-error/20 px-4 font-bold text-error transition-colors hover:bg-error/10"
+              >
+                Retry Sync
+              </button>
+            </div>
+          ) : null}
 
           <div className="space-y-6">
-            {items.map((item: CartItemBase) => {
+            {items.map((item: CartItemBase, index) => {
               const key = `${item.id}|${item.size}|${item.color}`;
               const hasStockValue = Object.prototype.hasOwnProperty.call(
                 stockByItem,
@@ -527,6 +672,13 @@ export default function CartPage() {
                 createProductHref({ id: item.id, name: item.name }, item.size);
               const isItemPending = pendingItemKey === key;
               const resolvedImageSources = imageSourcesByItem[key] || [];
+              const resolvedPricing = pricingByItem[key];
+              const unitPrice =
+                resolvedPricing && Number.isFinite(resolvedPricing.price)
+                  ? resolvedPricing.price
+                  : item.price;
+              const originalPrice = resolvedPricing?.originalPrice;
+              const discountPercent = getDiscountPercent(originalPrice, unitPrice);
 
               const imageContent = (
                 <>
@@ -535,6 +687,7 @@ export default function CartPage() {
                     fallbackSources={[item.image || ""]}
                     alt={item.name}
                     isOutOfStock={isOutOfStock}
+                    priority={index === 0}
                   />
 
                   {isOutOfStock ? (
@@ -550,81 +703,135 @@ export default function CartPage() {
               return (
                 <div
                   key={`${item.id}-${item.size}-${item.color}`}
-                  className={`group relative flex flex-row gap-3 rounded-[0.5rem] border p-3 transition-all duration-500 sm:p-6 ${
+                  className={`group relative overflow-hidden rounded-[0.75rem] border bg-white p-4 shadow-[0_18px_55px_rgba(21,66,18,0.06)] transition-all duration-500 sm:p-5 lg:p-6 ${
                     isOutOfStock || exceedsStock
                       ? "border-error/30 bg-error/[0.03]"
-                      : "border-outline-variant/30 bg-white hover:shadow-2xl hover:shadow-primary/5"
+                      : "border-outline-variant/30 hover:-translate-y-0.5 hover:shadow-[0_22px_60px_rgba(21,66,18,0.1)]"
                   }`}
                 >
-                  {isOutOfStock ? (
-                    <div className="relative aspect-square w-28 shrink-0 overflow-hidden rounded-[0.5rem] bg-surface-variant/10 sm:w-40 lg:w-[15vw] lg:max-w-[220px]">
-                      {imageContent}
-                    </div>
-                  ) : (
-                    <Link
-                      href={productHref}
-                      className="relative block aspect-square w-28 shrink-0 overflow-hidden rounded-[0.5rem] bg-surface-variant/10 sm:w-40 lg:w-[15vw] lg:max-w-[220px]"
-                      aria-label={`Open ${item.name} ${item.size}`}
-                    >
-                      {imageContent}
-                    </Link>
-                  )}
+                  <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary/70 via-secondary/60 to-primary/20" />
 
-                  <div className="flex flex-1 flex-col justify-between">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        {isOutOfStock ? (
-                          <h3 className="mb-1 text-xl font-bold text-primary/60">
-                            {item.name}
-                          </h3>
-                        ) : (
-                          <Link href={productHref} className="block">
-                            <h3 className="mb-1 text-xl font-bold text-primary transition-colors group-hover:text-primary-container">
+                  <div className="flex flex-col gap-4 md:grid md:grid-cols-[140px_minmax(0,1fr)] md:gap-5 lg:grid-cols-[180px_minmax(0,1fr)]">
+                    {isOutOfStock ? (
+                      <div className="relative aspect-square w-full overflow-hidden rounded-[0.75rem] bg-surface-container-low md:w-[140px] lg:w-[180px]">
+                        {imageContent}
+                      </div>
+                    ) : (
+                      <Link
+                        href={productHref}
+                        className="relative block aspect-square w-full overflow-hidden rounded-[0.75rem] bg-surface-container-low md:w-[140px] lg:w-[180px]"
+                        aria-label={`Open ${item.name} ${item.size}`}
+                      >
+                        {imageContent}
+                      </Link>
+                    )}
+
+                    <div className="flex min-w-0 flex-1 flex-col gap-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          {isOutOfStock ? (
+                            <h3 className="font-headline mb-2 line-clamp-2 text-2xl font-bold tracking-[-0.03em] text-primary/60">
                               {item.name}
                             </h3>
-                          </Link>
-                        )}
+                          ) : (
+                            <Link href={productHref} className="block">
+                              <h3 className="font-headline mb-2 line-clamp-2 text-2xl font-bold tracking-[-0.03em] text-primary transition-colors group-hover:text-primary-container">
+                                {item.name}
+                              </h3>
+                            </Link>
+                          )}
 
-                        <div className="flex flex-wrap gap-2">
-                          <span className="rounded-full bg-surface-variant/30 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
-                            Size: {item.size}
-                          </span>
-
-                          {item.color ? (
-                            <span className="rounded-full bg-surface-variant/30 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
-                              Color: {item.color}
+                          <div className="mb-3 flex flex-wrap gap-2">
+                            <span className="rounded-full border border-primary/10 bg-surface-container-low px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant">
+                              Size: {item.size}
                             </span>
-                          ) : null}
+
+                            {item.color ? (
+                              <span className="rounded-full border border-primary/10 bg-surface-container-low px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant">
+                                Color: {item.color}
+                              </span>
+                            ) : null}
+                          </div>
+
+                          <div className="flex flex-wrap items-end gap-x-4 gap-y-2">
+                            <div>
+                              <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-on-surface-variant/55">
+                                Unit Price
+                              </p>
+                              <p className="text-lg font-bold text-primary sm:text-xl">
+                                {currencySymbol}
+                                {unitPrice.toLocaleString()}
+                              </p>
+                              {typeof originalPrice === "number" && originalPrice > unitPrice ? (
+                                <div className="mt-1 flex flex-wrap items-center gap-2">
+                                  <span className="text-xs font-medium text-on-surface-variant/50 line-through sm:text-sm">
+                                    {currencySymbol}
+                                    {originalPrice.toLocaleString()}
+                                  </span>
+                                  <span className="rounded-full bg-secondary/10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-secondary">
+                                    {discountPercent}% off
+                                  </span>
+                                </div>
+                              ) : null}
+                            </div>
+
+                            <div className="hidden h-10 w-px bg-outline-variant/30 sm:block" />
+
+                            <div>
+                              <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-on-surface-variant/55">
+                                Availability
+                              </p>
+                              <p className={`text-sm font-semibold ${isOutOfStock || exceedsStock ? "text-error" : "text-primary/75"}`}>
+                                {isOutOfStock
+                                  ? "Unavailable"
+                                  : stockKnown
+                                    ? `${available} in stock`
+                                    : "Checking stock"}
+                              </p>
+                            </div>
+                          </div>
                         </div>
+
+                        <button
+                          onClick={() =>
+                            setRemoveTarget({
+                              id: item.id,
+                              size: item.size,
+                              color: item.color,
+                              name: item.name,
+                            })
+                          }
+                          disabled={isItemPending}
+                          className="flex min-h-11 min-w-11 items-center justify-center rounded-full border border-outline-variant/20 bg-surface-container-low text-on-surface-variant/50 transition-all hover:border-error/20 hover:bg-error/10 hover:text-error disabled:opacity-40"
+                          aria-label={`Remove ${item.name} from cart`}
+                          type="button"
+                        >
+                          <span className="material-symbols-outlined text-xl leading-none">
+                            delete_sweep
+                          </span>
+                        </button>
                       </div>
 
-                      <button
-                        onClick={() =>
-                          setRemoveTarget({
-                            id: item.id,
-                            size: item.size,
-                            color: item.color,
-                            name: item.name,
-                          })
-                        }
-                        disabled={isItemPending}
-                        className="flex h-10 w-10 items-center justify-center rounded-full text-on-surface-variant/40 transition-all hover:bg-error/10 hover:text-error disabled:opacity-40"
-                        aria-label={`Remove ${item.name} from cart`}
-                        type="button"
-                      >
-                        <span className="material-symbols-outlined text-xl leading-none">
-                          delete_sweep
-                        </span>
-                      </button>
+                      {isOutOfStock ? (
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-error">
+                          This item is currently unavailable
+                        </p>
+                      ) : exceedsStock ? (
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-error">
+                          Only {available} left in stock
+                        </p>
+                      ) : null}
                     </div>
+                  </div>
 
-                    <div className="mt-6 flex items-center justify-between sm:mt-2">
-                      <div className="flex items-center rounded-2xl border border-outline-variant/10 bg-surface-variant/20 p-1">
+                  <div className="mt-4 flex flex-col gap-3 border-t border-outline-variant/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center justify-between gap-3 sm:justify-start">
+                      <div className="flex items-center rounded-full border border-outline-variant/20 bg-surface-container-low px-1.5 py-1 shadow-sm">
                         <button
                           onClick={() =>
                             handleQuantityChange(item, -1, available)
                           }
-                          className="flex h-8 w-8 items-center justify-center rounded-xl text-primary transition-all hover:bg-white hover:shadow-sm disabled:opacity-30"
+                          className="flex min-h-10 min-w-10 items-center justify-center rounded-full text-primary transition-all hover:bg-white hover:shadow-sm disabled:opacity-30"
                           disabled={
                             item.qty <= 1 ||
                             isOutOfStock ||
@@ -638,7 +845,7 @@ export default function CartPage() {
                           </span>
                         </button>
 
-                        <span className="w-10 text-center text-sm font-bold text-primary">
+                        <span className="w-12 text-center text-base font-extrabold text-primary">
                           {item.qty}
                         </span>
 
@@ -646,7 +853,7 @@ export default function CartPage() {
                           onClick={() =>
                             handleQuantityChange(item, 1, available)
                           }
-                          className="flex h-8 w-8 items-center justify-center rounded-xl text-primary transition-all hover:bg-white hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-30"
+                          className="flex min-h-10 min-w-10 items-center justify-center rounded-full text-primary transition-all hover:bg-white hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-30"
                           disabled={
                             !stockKnown ||
                             isOutOfStock ||
@@ -661,36 +868,183 @@ export default function CartPage() {
                         </button>
                       </div>
 
-                      <div className="text-right">
-                        <span className="block text-xs font-bold uppercase leading-none tracking-tighter text-on-surface-variant/50">
+                      <div className="text-right sm:hidden">
+                        <span className="block text-[11px] font-bold uppercase leading-none tracking-[0.2em] text-on-surface-variant/50">
                           Subtotal
                         </span>
 
-                        <span className="text-2xl font-black leading-none tracking-tighter text-primary">
+                        <span className="font-headline text-[1.85rem] font-semibold leading-none tracking-[-0.02em] text-primary sm:text-3xl">
                           {currencySymbol}
-                          {(item.price * item.qty).toLocaleString()}
+                          {(unitPrice * item.qty).toLocaleString()}
                         </span>
                       </div>
+                    </div>
+
+                    <div className="hidden text-right sm:block">
+                        <span className="block text-xs font-bold uppercase leading-none tracking-[0.2em] text-on-surface-variant/50">
+                          Subtotal
+                        </span>
+
+                        <span className="font-headline text-[2.1rem] font-semibold leading-none tracking-[-0.02em] text-primary sm:text-[2.35rem]">
+                          {currencySymbol}
+                          {(unitPrice * item.qty).toLocaleString()}
+                        </span>
                     </div>
                   </div>
                 </div>
               );
             })}
           </div>
+
+          <section className="pt-2">
+            <div className="mb-5 flex items-end justify-between gap-3">
+              <div>
+                <h2 className="font-headline text-2xl font-bold tracking-[-0.03em] text-primary sm:text-3xl">
+                  You May Also Like
+                </h2>
+                <p className="mt-1 text-sm text-on-surface-variant/70">
+                  Handpicked from similar categories in your cart.
+                </p>
+              </div>
+            </div>
+
+            {recommendationsLoading ? (
+              <div className="flex gap-3 overflow-x-auto pb-2 hide-scrollbar sm:grid sm:grid-cols-2 sm:gap-4 sm:overflow-visible lg:grid-cols-3">
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="w-[230px] shrink-0 rounded-[0.75rem] border border-outline-variant/20 bg-white p-3 shadow-[0_16px_45px_rgba(21,66,18,0.05)] sm:w-auto sm:p-4"
+                  >
+                    <div className="aspect-[4/2.85] animate-pulse rounded-[0.75rem] bg-surface-variant/30 sm:aspect-[4/3.3]" />
+                    <div className="mt-4 h-6 w-3/4 animate-pulse rounded-full bg-surface-variant/30" />
+                    <div className="mt-2 h-4 w-1/2 animate-pulse rounded-full bg-surface-variant/20" />
+                    <div className="mt-5 h-11 animate-pulse rounded-full bg-surface-variant/20" />
+                  </div>
+                ))}
+              </div>
+            ) : recommendations.length > 0 ? (
+              <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory hide-scrollbar sm:grid sm:grid-cols-2 sm:gap-4 sm:overflow-visible sm:snap-none lg:grid-cols-3">
+                {recommendations.map((product) => {
+                  const variant = product.variants?.[0];
+                  const productHref = createProductHref(product, variant?.label);
+                  const imageSources = getProductImageSources(product, variant?.label);
+                  const displayPrice =
+                    typeof variant?.price === "number" && Number.isFinite(variant.price)
+                      ? variant.price
+                      : product.price;
+                  const displayOriginal =
+                    typeof variant?.originalPrice === "number" && Number.isFinite(variant.originalPrice)
+                      ? variant.originalPrice
+                      : product.originalPrice;
+                  const isRecommendationPending = pendingRecommendationId === product.id;
+                  const discountPercent = getDiscountPercent(displayOriginal, displayPrice);
+
+                  return (
+                    <div
+                      key={product.id}
+                      className="w-[230px] shrink-0 snap-start overflow-hidden rounded-[0.75rem] border border-outline-variant/20 bg-white p-3 shadow-[0_16px_45px_rgba(21,66,18,0.05)] transition-all hover:-translate-y-0.5 hover:shadow-[0_20px_55px_rgba(21,66,18,0.1)] sm:w-auto sm:p-4"
+                    >
+                      <Link
+                        href={productHref}
+                        className="block overflow-hidden rounded-[0.75rem] bg-surface-container-low"
+                      >
+                        <div className="relative aspect-[4/2.85] sm:aspect-[4/3.3]">
+                          <img
+                            src={imageSources[0] || product.image || "/placeholder-product.png"}
+                            alt={product.name}
+                            loading="lazy"
+                            className="h-full w-full object-contain p-2.5 transition-transform duration-500 hover:scale-105 sm:object-cover sm:p-0"
+                          />
+                          {discountPercent > 0 ? (
+                            <span className="absolute left-2.5 top-2.5 rounded-full bg-secondary px-2 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-white sm:left-3 sm:top-3 sm:px-2.5 sm:text-[10px]">
+                              {discountPercent}% off
+                            </span>
+                          ) : null}
+                        </div>
+                      </Link>
+
+                      <div className="mt-3 sm:mt-4">
+                        <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-on-surface-variant/55">
+                          {product.category || product.collection || "Recommended"}
+                        </p>
+                        <Link href={productHref} className="mt-1 block">
+                          <h3 className="font-headline line-clamp-2 min-h-[2.9rem] text-lg font-semibold tracking-[-0.02em] text-primary sm:min-h-[3.4rem] sm:text-[1.55rem] sm:font-bold">
+                            {product.name}
+                          </h3>
+                        </Link>
+
+                        <div className="mt-2.5 flex flex-wrap items-end gap-2">
+                          <span className="text-base font-bold text-primary sm:text-lg">
+                            {currencySymbol}
+                            {displayPrice.toLocaleString()}
+                          </span>
+                          {typeof displayOriginal === "number" && displayOriginal > displayPrice ? (
+                            <span className="text-xs font-medium text-on-surface-variant/50 line-through sm:text-sm">
+                              {currencySymbol}
+                              {displayOriginal.toLocaleString()}
+                            </span>
+                          ) : null}
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            if (isRecommendationPending) return;
+                            const chosenSize = variant?.label || product.sizes?.[0] || "Default";
+                            setPendingRecommendationId(product.id);
+                            try {
+                              addItem({
+                                id: product.id,
+                                name: product.name,
+                                price: displayPrice,
+                                size: chosenSize,
+                                color: "",
+                                image: imageSources[0] || product.image || "",
+                                collection: String(product.collection || product.category || "SHOP").toUpperCase(),
+                              });
+                              await new Promise((resolve) => window.setTimeout(resolve, 240));
+                            } finally {
+                              setPendingRecommendationId((current) => current === product.id ? null : current);
+                            }
+                          }}
+                          disabled={isRecommendationPending}
+                          className={`mt-4 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-full px-4 text-sm font-semibold transition-all sm:mt-5 sm:min-h-11 ${
+                            isRecommendationPending
+                              ? "cursor-wait bg-primary/85 text-white shadow-lg shadow-primary/15"
+                              : "bg-primary text-white hover:bg-primary-container hover:shadow-lg hover:shadow-primary/20"
+                          }`}
+                        >
+                          <span className="material-symbols-outlined text-base">
+                            {isRecommendationPending ? "progress_activity" : "add_shopping_cart"}
+                          </span>
+                          {isRecommendationPending ? "Adding..." : "Add to Cart"}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : null}
+          </section>
         </section>
 
-        <aside className="w-full lg:sticky lg:top-32 lg:col-span-4">
-          <div className="rounded-[0.5rem] border border-outline-variant/30 bg-white p-4 shadow-2xl shadow-primary/5 lg:p-8">
-            <h2 className="mb-8 text-2xl font-bold tracking-tight text-primary">
+        <aside className="w-full lg:sticky lg:top-24 lg:col-span-4">
+          <div className="rounded-[0.75rem] border border-outline-variant/30 bg-white p-5 shadow-[0_24px_70px_rgba(21,66,18,0.08)] lg:p-8">
+            <div className="mb-8 flex items-center justify-between gap-3">
+              <h2 className="font-headline text-3xl font-bold tracking-[-0.03em] text-primary">
               Order Summary
-            </h2>
+              </h2>
+              <span className="rounded-full bg-secondary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-secondary">
+                Secure
+              </span>
+            </div>
 
             <div className="space-y-5">
               <div className="flex items-center justify-between text-on-surface-variant/70">
-                <span className="text-sm font-medium">Bag Subtotal</span>
-                <span className="font-semibold">
+                <span className="text-sm font-medium">Cart Subtotal</span>
+                <span className="text-base font-medium text-primary/85">
                   {currencySymbol}
-                  {subtotal.toLocaleString()}
+                  {Math.round(animatedSubtotal).toLocaleString()}
                 </span>
               </div>
 
@@ -704,14 +1058,14 @@ export default function CartPage() {
               <div className="my-2 h-px bg-outline-variant/20" />
 
               <div className="flex items-center justify-between py-2">
-                <p className="mb-1 text-[20px] font-black uppercase tracking-widest text-on-surface-variant/80">
+                <p className="mb-1 text-[20px] font-black uppercase tracking-[0.2em] text-on-surface-variant/80">
                   Total
                 </p>
 
                 <div className="text-right">
-                  <p className="text-4xl font-black leading-none tracking-tighter text-primary">
+                  <p className="font-headline text-[3.25rem] font-semibold leading-none tracking-[-0.03em] text-primary sm:text-[3.5rem]">
                     {currencySymbol}
-                    {total.toLocaleString()}
+                    {Math.round(animatedTotal).toLocaleString()}
                   </p>
                 </div>
               </div>
@@ -723,10 +1077,10 @@ export default function CartPage() {
                 if (isCheckoutBlocked) event.preventDefault();
               }}
               aria-disabled={isCheckoutBlocked}
-              className={`group mt-10 flex w-full items-center justify-center gap-3 rounded-[1.5rem] py-5 text-lg font-bold transition-all ${
+              className={`group mt-10 flex min-h-14 w-full items-center justify-center gap-3 rounded-full px-5 text-lg font-bold transition-all ${
                 isCheckoutBlocked
                   ? "cursor-not-allowed bg-surface-variant text-on-surface-variant/50"
-                  : "bg-primary text-white hover:shadow-2xl hover:shadow-primary/30 active:scale-[0.98]"
+                  : "bg-primary text-white hover:-translate-y-0.5 hover:shadow-2xl hover:shadow-primary/30 active:scale-[0.98]"
               }`}
             >
               {isStockLoading
@@ -743,14 +1097,14 @@ export default function CartPage() {
             </Link>
 
             <div className="mt-8 flex flex-col gap-4">
-              <div className="flex items-center gap-3 text-on-surface-variant/60">
+              <div className="flex items-center gap-3 rounded-[0.5rem] bg-surface-container-low px-3 py-3 text-on-surface-variant/60">
                 <span className="material-symbols-outlined text-lg text-primary/60">
                   verified
                 </span>
                 <p className="text-xs font-medium">Authenticity Guaranteed</p>
               </div>
 
-              <div className="flex items-center gap-3 text-on-surface-variant/60">
+              <div className="flex items-center gap-3 rounded-[0.5rem] bg-surface-container-low px-3 py-3 text-on-surface-variant/60">
                 <span className="material-symbols-outlined text-lg text-primary/60">
                   local_shipping
                 </span>
@@ -761,6 +1115,39 @@ export default function CartPage() {
             </div>
           </div>
         </aside>
+      </div>
+
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-outline-variant/20 bg-white/95 px-4 py-3 shadow-[0_-12px_35px_rgba(21,66,18,0.12)] backdrop-blur-xl sm:px-6 lg:hidden">
+        <div className="mx-auto flex max-w-[1600px] items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-on-surface-variant/55">
+              Total
+            </p>
+            <p className="font-headline truncate text-3xl font-bold tracking-[-0.03em] text-primary">
+              {currencySymbol}
+              {Math.round(animatedTotal).toLocaleString()}
+            </p>
+            <p className="text-xs text-on-surface-variant/70">
+              {Math.round(animatedItemCount)} {itemCount === 1 ? "item" : "items"} ready for checkout
+            </p>
+          </div>
+
+          <Link
+            href={isCheckoutBlocked ? "#" : "/checkout"}
+            onClick={(event) => {
+              if (isCheckoutBlocked) event.preventDefault();
+            }}
+            aria-disabled={isCheckoutBlocked}
+            className={`inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-full px-5 text-sm font-bold transition-all ${
+              isCheckoutBlocked
+                ? "cursor-not-allowed bg-surface-variant text-on-surface-variant/50"
+                : "bg-primary text-white shadow-lg shadow-primary/20"
+            }`}
+          >
+            <span className="material-symbols-outlined text-base">lock</span>
+            Checkout
+          </Link>
+        </div>
       </div>
 
       <ConfirmModal

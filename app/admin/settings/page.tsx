@@ -464,7 +464,7 @@ export default function AdminSettings() {
                                 </div>
                                 <div className="flex justify-between border-b border-white/10 pb-2">
                                     <span className="text-[10px] font-bold uppercase opacity-60 tracking-tighter">Currency</span>
-                                    <span className="text-xs font-medium">{form.currencySymbol || '$'}</span>
+                                    <span className="text-xs font-medium">{form.currencySymbol || '₹'}</span>
                                 </div>
                                 <div className="pt-2 text-[10px] italic opacity-60 leading-relaxed truncate">
                                     {form.companyAddress || 'No address set'}

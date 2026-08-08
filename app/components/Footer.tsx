@@ -271,13 +271,11 @@ export default function Footer() {
           </p>
 
          <p className="text-[10px] font-black uppercase tracking-[0.16em] text-white/45 md:text-[10px]">
-  Tech Support by{" "}
+  Developed by{" "}
   <span className="text-white/72">AKAMIFY</span>
   {" • "}
-  <br />
-  Marketing by{" "}
-  <span className="text-white/72">Digital Adbird</span>
-</p>
+  
+   </p>
         </div>
       </div>
     </footer>
