@@ -601,8 +601,8 @@ export default function CartPage() {
 
   return (
     <main className="mx-auto min-h-screen max-w-[1600px] bg-surface px-4 pt-6 pb-10 sm:px-6 sm:pt-8 lg:px-12 lg:pt-10 xl:px-16">
-      <section className="mb-6 rounded-[0.75rem] border border-primary/10 bg-gradient-to-r from-primary/[0.04] via-white to-secondary/[0.06] px-5 py-5 shadow-[0_18px_60px_rgba(21,66,18,0.06)] sm:px-7 sm:py-6">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+      <section className="mb-6 rounded-[0.75rem] border border-primary/10 bg-gradient-to-r from-primary/[0.04] via-white to-secondary/[0.06] px-4 py-4 shadow-[0_18px_60px_rgba(21,66,18,0.06)] sm:px-7 sm:py-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3">
             <span className="inline-flex w-fit items-center gap-2 rounded-full border border-primary/10 bg-white/80 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.24em] text-primary/75">
               <span className="material-symbols-outlined text-sm">shopping_bag</span>
@@ -610,22 +610,22 @@ export default function CartPage() {
             </span>
 
             <div>
-              <h1 className="font-headline text-4xl font-bold tracking-[-0.04em] text-primary sm:text-5xl lg:text-6xl">
+              <h1 className="font-headline text-3xl font-bold tracking-[-0.04em] text-primary sm:text-5xl lg:text-6xl">
                 Your Cart
               </h1>
-              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-on-surface-variant/75 sm:text-base">
+              <p className="mt-1 max-w-2xl text-xs leading-relaxed text-on-surface-variant/75 sm:mt-2 sm:text-base">
                 Review your items, adjust quantities, and continue to checkout with confidence.
               </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="rounded-full border border-primary/10 bg-white/80 px-4 py-2 text-sm font-semibold text-on-surface-variant">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <div className="rounded-full border border-primary/10 bg-white/80 px-3 py-1.5 text-xs font-semibold text-on-surface-variant sm:px-4 sm:py-2 sm:text-sm">
               {Math.round(animatedItemCount)} {itemCount === 1 ? "item" : "items"} selected
             </div>
             <Link
               href="/shop"
-              className="inline-flex min-h-11 items-center gap-2 rounded-full bg-primary px-5 text-sm font-bold text-white transition-all hover:bg-primary-container hover:shadow-lg hover:shadow-primary/20"
+              className="inline-flex min-h-10 items-center gap-2 rounded-full bg-primary px-4 text-sm font-bold text-white transition-all hover:bg-primary-container hover:shadow-lg hover:shadow-primary/20 sm:min-h-11 sm:px-5"
             >
               <span className="material-symbols-outlined text-base">
                 add_shopping_cart
@@ -679,6 +679,7 @@ export default function CartPage() {
                   : item.price;
               const originalPrice = resolvedPricing?.originalPrice;
               const discountPercent = getDiscountPercent(originalPrice, unitPrice);
+              const lineSubtotal = unitPrice * item.qty;
 
               const imageContent = (
                 <>
@@ -700,10 +701,139 @@ export default function CartPage() {
                 </>
               );
 
+              const removeButton = (
+                <button
+                  onClick={() =>
+                    setRemoveTarget({
+                      id: item.id,
+                      size: item.size,
+                      color: item.color,
+                      name: item.name,
+                    })
+                  }
+                  disabled={isItemPending}
+                  className="flex min-h-9 min-w-9 shrink-0 items-center justify-center rounded-full border border-outline-variant/20 bg-surface-container-low text-on-surface-variant/50 transition-all hover:border-error/20 hover:bg-error/10 hover:text-error disabled:opacity-40 sm:min-h-10 sm:min-w-10"
+                  aria-label={`Remove ${item.name} from cart`}
+                  type="button"
+                >
+                  <span className="material-symbols-outlined text-lg leading-none">
+                    delete_sweep
+                  </span>
+                </button>
+              );
+
+              const mobileQuantityControl = (
+                <div className="flex items-center rounded-full border border-outline-variant/20 bg-surface-container-low px-1 py-1 shadow-sm lg:hidden">
+                  <button
+                    onClick={() =>
+                      handleQuantityChange(item, -1, available)
+                    }
+                    className="flex h-9 w-9 items-center justify-center rounded-full text-primary transition-all hover:bg-white hover:shadow-sm disabled:opacity-30"
+                    disabled={
+                      item.qty <= 1 ||
+                      isOutOfStock ||
+                      isItemPending ||
+                      Boolean(stockError)
+                    }
+                    type="button"
+                    aria-label={`Decrease quantity for ${item.name}`}
+                  >
+                    <span className="material-symbols-outlined text-base">
+                      remove
+                    </span>
+                  </button>
+
+                  <span className="min-w-8 px-1 text-center text-base font-extrabold leading-none text-primary">
+                    {item.qty}
+                  </span>
+
+                  <button
+                    onClick={() =>
+                      handleQuantityChange(item, 1, available)
+                    }
+                    className="flex h-9 w-9 items-center justify-center rounded-full text-primary transition-all hover:bg-white hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-30"
+                    disabled={
+                      !stockKnown ||
+                      isOutOfStock ||
+                      isItemPending ||
+                      item.qty >= available
+                    }
+                    type="button"
+                    aria-label={`Increase quantity for ${item.name}`}
+                    >
+                      <span className="material-symbols-outlined text-base">
+                        add
+                      </span>
+                    </button>
+                </div>
+              );
+
+              const desktopQuantityControl = (
+                <div className="hidden lg:flex lg:flex-col lg:items-end lg:gap-4">
+                  <div className="flex items-center justify-end gap-3">
+                    <button
+                      onClick={() =>
+                        handleQuantityChange(item, -1, available)
+                      }
+                      className="flex h-10 w-10 items-center justify-center rounded-xl border border-outline-variant/20 bg-surface-container-low text-primary transition-all hover:bg-white hover:shadow-sm disabled:opacity-30"
+                      disabled={
+                        item.qty <= 1 ||
+                        isOutOfStock ||
+                        isItemPending ||
+                        Boolean(stockError)
+                      }
+                      type="button"
+                      aria-label={`Decrease quantity for ${item.name}`}
+                    >
+                      <span className="material-symbols-outlined text-base">
+                        remove
+                      </span>
+                    </button>
+
+                    <span className="min-w-8 text-center text-lg font-extrabold text-primary">
+                      {item.qty}
+                    </span>
+
+                    <button
+                      onClick={() =>
+                        handleQuantityChange(item, 1, available)
+                      }
+                      className="flex h-10 w-10 items-center justify-center rounded-xl border border-outline-variant/20 bg-surface-container-low text-primary transition-all hover:bg-white hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-30"
+                      disabled={
+                        !stockKnown ||
+                        isOutOfStock ||
+                        isItemPending ||
+                        item.qty >= available
+                      }
+                      type="button"
+                      aria-label={`Increase quantity for ${item.name}`}
+                    >
+                      <span className="material-symbols-outlined text-base">
+                        add
+                      </span>
+                    </button>
+                  </div>
+
+                  <div className="text-right">
+                    <span className="block text-[11px] font-bold uppercase leading-none tracking-[0.18em] text-on-surface-variant/45">
+                      Subtotal
+                    </span>
+                    <span className="font-headline text-[2rem] font-semibold leading-none tracking-[-0.02em] text-primary">
+                      {currencySymbol}
+                      {lineSubtotal.toLocaleString()}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-end">
+                    {removeButton}
+                  </div>
+                </div>
+              );
+
               return (
                 <div
                   key={`${item.id}-${item.size}-${item.color}`}
-                  className={`group relative overflow-hidden rounded-[0.75rem] border bg-white p-4 shadow-[0_18px_55px_rgba(21,66,18,0.06)] transition-all duration-500 sm:p-5 lg:p-6 ${
+                  className={`group relative overflow-hidden rounded-[0.75rem] border bg-white p-3.5 shadow-[0_18px_55px_rgba(21,66,18,0.06)] transition-all duration-500 sm:p-5 lg:p-6 ${
                     isOutOfStock || exceedsStock
                       ? "border-error/30 bg-error/[0.03]"
                       : "border-outline-variant/30 hover:-translate-y-0.5 hover:shadow-[0_22px_60px_rgba(21,66,18,0.1)]"
@@ -711,37 +841,115 @@ export default function CartPage() {
                 >
                   <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary/70 via-secondary/60 to-primary/20" />
 
-                  <div className="flex flex-col gap-4 md:grid md:grid-cols-[140px_minmax(0,1fr)] md:gap-5 lg:grid-cols-[180px_minmax(0,1fr)]">
+                  <div className="grid grid-cols-[92px_minmax(0,1fr)] gap-3 lg:hidden">
                     {isOutOfStock ? (
-                      <div className="relative aspect-square w-full overflow-hidden rounded-[0.75rem] bg-surface-container-low md:w-[140px] lg:w-[180px]">
+                      <div className="relative aspect-square h-[92px] w-[92px] overflow-hidden rounded-2xl bg-surface-container-low">
                         {imageContent}
                       </div>
                     ) : (
                       <Link
                         href={productHref}
-                        className="relative block aspect-square w-full overflow-hidden rounded-[0.75rem] bg-surface-container-low md:w-[140px] lg:w-[180px]"
+                        className="relative block aspect-square h-[92px] w-[92px] overflow-hidden rounded-2xl bg-surface-container-low"
                         aria-label={`Open ${item.name} ${item.size}`}
                       >
                         {imageContent}
                       </Link>
                     )}
 
-                    <div className="flex min-w-0 flex-1 flex-col gap-3">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
+                    <div className="min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0 pr-1">
                           {isOutOfStock ? (
-                            <h3 className="font-headline mb-2 line-clamp-2 text-2xl font-bold tracking-[-0.03em] text-primary/60">
+                            <h3 className="font-headline line-clamp-2 text-[1.28rem] font-bold leading-tight tracking-[-0.03em] text-primary/60">
                               {item.name}
                             </h3>
                           ) : (
                             <Link href={productHref} className="block">
-                              <h3 className="font-headline mb-2 line-clamp-2 text-2xl font-bold tracking-[-0.03em] text-primary transition-colors group-hover:text-primary-container">
+                              <h3 className="font-headline line-clamp-2 text-[1.28rem] font-bold leading-tight tracking-[-0.03em] text-primary transition-colors group-hover:text-primary-container">
+                                {item.name}
+                              </h3>
+                            </Link>
+                          )}
+                        </div>
+
+                        {removeButton}
+                      </div>
+
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        <span className="rounded-full border border-primary/10 bg-surface-container-low px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-on-surface-variant">
+                          Size: {item.size}
+                        </span>
+
+                        {item.color ? (
+                          <span className="rounded-full border border-primary/10 bg-surface-container-low px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-on-surface-variant">
+                            {item.color}
+                          </span>
+                        ) : null}
+                      </div>
+
+                      <div className="mt-2 flex items-end justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-end gap-2">
+                            <span className="text-[1.45rem] font-black leading-none text-primary">
+                              {currencySymbol}
+                              {unitPrice.toLocaleString()}
+                            </span>
+                            {typeof originalPrice === "number" && originalPrice > unitPrice ? (
+                              <>
+                                <span className="text-xs font-medium text-on-surface-variant/50 line-through">
+                                  {currencySymbol}
+                                  {originalPrice.toLocaleString()}
+                                </span>
+                                <span className="rounded-full bg-secondary/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.16em] text-secondary">
+                                  {discountPercent}% off
+                                </span>
+                              </>
+                            ) : null}
+                          </div>
+
+                          {(isOutOfStock || exceedsStock) ? (
+                            <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-error">
+                              {isOutOfStock ? "Currently unavailable" : `Only ${available} left in stock`}
+                            </p>
+                          ) : null}
+                        </div>
+
+                        {mobileQuantityControl}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="hidden lg:grid lg:grid-cols-[9rem_minmax(0,1fr)_13rem] lg:items-center lg:gap-6">
+                    {isOutOfStock ? (
+                      <div className="relative aspect-square w-36 overflow-hidden rounded-[0.75rem] bg-surface-container-low">
+                        {imageContent}
+                      </div>
+                    ) : (
+                      <Link
+                        href={productHref}
+                        className="relative block aspect-square w-36 overflow-hidden rounded-[0.75rem] bg-surface-container-low"
+                        aria-label={`Open ${item.name} ${item.size}`}
+                      >
+                        {imageContent}
+                      </Link>
+                    )}
+
+                    <div className="min-w-0">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="min-w-0">
+                          {isOutOfStock ? (
+                            <h3 className="font-headline mb-2 line-clamp-2 text-[1.9rem] font-bold tracking-[-0.03em] text-primary/60">
+                              {item.name}
+                            </h3>
+                          ) : (
+                            <Link href={productHref} className="block">
+                              <h3 className="font-headline mb-2 line-clamp-2 text-[1.9rem] font-bold tracking-[-0.03em] text-primary transition-colors group-hover:text-primary-container">
                                 {item.name}
                               </h3>
                             </Link>
                           )}
 
-                          <div className="mb-3 flex flex-wrap gap-2">
+                          <div className="mb-3 flex flex-wrap items-center gap-2 text-sm text-on-surface-variant/70">
                             <span className="rounded-full border border-primary/10 bg-surface-container-low px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant">
                               Size: {item.size}
                             </span>
@@ -753,29 +961,31 @@ export default function CartPage() {
                             ) : null}
                           </div>
 
-                          <div className="flex flex-wrap items-end gap-x-4 gap-y-2">
+                          <div className="flex flex-wrap items-end gap-x-6 gap-y-3">
                             <div>
                               <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-on-surface-variant/55">
                                 Unit Price
                               </p>
-                              <p className="text-lg font-bold text-primary sm:text-xl">
-                                {currencySymbol}
-                                {unitPrice.toLocaleString()}
-                              </p>
-                              {typeof originalPrice === "number" && originalPrice > unitPrice ? (
-                                <div className="mt-1 flex flex-wrap items-center gap-2">
-                                  <span className="text-xs font-medium text-on-surface-variant/50 line-through sm:text-sm">
-                                    {currencySymbol}
-                                    {originalPrice.toLocaleString()}
-                                  </span>
-                                  <span className="rounded-full bg-secondary/10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-secondary">
-                                    {discountPercent}% off
-                                  </span>
-                                </div>
-                              ) : null}
+                              <div className="mt-1 flex flex-wrap items-end gap-2">
+                                <span className="text-2xl font-bold text-primary">
+                                  {currencySymbol}
+                                  {unitPrice.toLocaleString()}
+                                </span>
+                                {typeof originalPrice === "number" && originalPrice > unitPrice ? (
+                                  <>
+                                    <span className="text-sm font-medium text-on-surface-variant/50 line-through">
+                                      {currencySymbol}
+                                      {originalPrice.toLocaleString()}
+                                    </span>
+                                    <span className="rounded-full bg-secondary/10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-secondary">
+                                      {discountPercent}% off
+                                    </span>
+                                  </>
+                                ) : null}
+                              </div>
                             </div>
 
-                            <div className="hidden h-10 w-px bg-outline-variant/30 sm:block" />
+                            <div className="h-11 w-px bg-outline-variant/30" />
 
                             <div>
                               <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-on-surface-variant/55">
@@ -790,106 +1000,21 @@ export default function CartPage() {
                               </p>
                             </div>
                           </div>
+
+                          {isOutOfStock ? (
+                            <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-error">
+                              This item is currently unavailable
+                            </p>
+                          ) : exceedsStock ? (
+                            <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-error">
+                              Only {available} left in stock
+                            </p>
+                          ) : null}
                         </div>
-
-                        <button
-                          onClick={() =>
-                            setRemoveTarget({
-                              id: item.id,
-                              size: item.size,
-                              color: item.color,
-                              name: item.name,
-                            })
-                          }
-                          disabled={isItemPending}
-                          className="flex min-h-11 min-w-11 items-center justify-center rounded-full border border-outline-variant/20 bg-surface-container-low text-on-surface-variant/50 transition-all hover:border-error/20 hover:bg-error/10 hover:text-error disabled:opacity-40"
-                          aria-label={`Remove ${item.name} from cart`}
-                          type="button"
-                        >
-                          <span className="material-symbols-outlined text-xl leading-none">
-                            delete_sweep
-                          </span>
-                        </button>
-                      </div>
-
-                      {isOutOfStock ? (
-                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-error">
-                          This item is currently unavailable
-                        </p>
-                      ) : exceedsStock ? (
-                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-error">
-                          Only {available} left in stock
-                        </p>
-                      ) : null}
-                    </div>
-                  </div>
-
-                  <div className="mt-4 flex flex-col gap-3 border-t border-outline-variant/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-center justify-between gap-3 sm:justify-start">
-                      <div className="flex items-center rounded-full border border-outline-variant/20 bg-surface-container-low px-1.5 py-1 shadow-sm">
-                        <button
-                          onClick={() =>
-                            handleQuantityChange(item, -1, available)
-                          }
-                          className="flex min-h-10 min-w-10 items-center justify-center rounded-full text-primary transition-all hover:bg-white hover:shadow-sm disabled:opacity-30"
-                          disabled={
-                            item.qty <= 1 ||
-                            isOutOfStock ||
-                            isItemPending ||
-                            Boolean(stockError)
-                          }
-                          type="button"
-                        >
-                          <span className="material-symbols-outlined text-base">
-                            remove
-                          </span>
-                        </button>
-
-                        <span className="w-12 text-center text-base font-extrabold text-primary">
-                          {item.qty}
-                        </span>
-
-                        <button
-                          onClick={() =>
-                            handleQuantityChange(item, 1, available)
-                          }
-                          className="flex min-h-10 min-w-10 items-center justify-center rounded-full text-primary transition-all hover:bg-white hover:shadow-sm disabled:cursor-not-allowed disabled:opacity-30"
-                          disabled={
-                            !stockKnown ||
-                            isOutOfStock ||
-                            isItemPending ||
-                            item.qty >= available
-                          }
-                          type="button"
-                        >
-                          <span className="material-symbols-outlined text-base">
-                            add
-                          </span>
-                        </button>
-                      </div>
-
-                      <div className="text-right sm:hidden">
-                        <span className="block text-[11px] font-bold uppercase leading-none tracking-[0.2em] text-on-surface-variant/50">
-                          Subtotal
-                        </span>
-
-                        <span className="font-headline text-[1.85rem] font-semibold leading-none tracking-[-0.02em] text-primary sm:text-3xl">
-                          {currencySymbol}
-                          {(unitPrice * item.qty).toLocaleString()}
-                        </span>
                       </div>
                     </div>
 
-                    <div className="hidden text-right sm:block">
-                        <span className="block text-xs font-bold uppercase leading-none tracking-[0.2em] text-on-surface-variant/50">
-                          Subtotal
-                        </span>
-
-                        <span className="font-headline text-[2.1rem] font-semibold leading-none tracking-[-0.02em] text-primary sm:text-[2.35rem]">
-                          {currencySymbol}
-                          {(unitPrice * item.qty).toLocaleString()}
-                        </span>
-                    </div>
+                    {desktopQuantityControl}
                   </div>
                 </div>
               );
@@ -909,21 +1034,21 @@ export default function CartPage() {
             </div>
 
             {recommendationsLoading ? (
-              <div className="flex gap-3 overflow-x-auto pb-2 hide-scrollbar sm:grid sm:grid-cols-2 sm:gap-4 sm:overflow-visible lg:grid-cols-3">
+              <div className="flex gap-2.5 overflow-x-auto pb-2 hide-scrollbar sm:grid sm:grid-cols-2 sm:gap-4 sm:overflow-visible xl:grid-cols-4">
                 {Array.from({ length: 4 }).map((_, index) => (
                   <div
                     key={index}
-                    className="w-[230px] shrink-0 rounded-[0.75rem] border border-outline-variant/20 bg-white p-3 shadow-[0_16px_45px_rgba(21,66,18,0.05)] sm:w-auto sm:p-4"
+                    className="w-[170px] shrink-0 rounded-[0.75rem] border border-outline-variant/20 bg-white p-2.5 shadow-[0_16px_45px_rgba(21,66,18,0.05)] sm:w-auto sm:p-4"
                   >
-                    <div className="aspect-[4/2.85] animate-pulse rounded-[0.75rem] bg-surface-variant/30 sm:aspect-[4/3.3]" />
-                    <div className="mt-4 h-6 w-3/4 animate-pulse rounded-full bg-surface-variant/30" />
+                    <div className="aspect-square animate-pulse rounded-[0.75rem] bg-surface-variant/30 sm:aspect-[4/3.3]" />
+                    <div className="mt-3 h-5 w-3/4 animate-pulse rounded-full bg-surface-variant/30" />
                     <div className="mt-2 h-4 w-1/2 animate-pulse rounded-full bg-surface-variant/20" />
-                    <div className="mt-5 h-11 animate-pulse rounded-full bg-surface-variant/20" />
+                    <div className="mt-4 h-10 animate-pulse rounded-full bg-surface-variant/20" />
                   </div>
                 ))}
               </div>
             ) : recommendations.length > 0 ? (
-              <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory hide-scrollbar sm:grid sm:grid-cols-2 sm:gap-4 sm:overflow-visible sm:snap-none lg:grid-cols-3">
+              <div className="flex gap-2.5 overflow-x-auto pb-2 snap-x snap-mandatory hide-scrollbar sm:grid sm:grid-cols-2 sm:gap-4 sm:overflow-visible sm:snap-none xl:grid-cols-4">
                 {recommendations.map((product) => {
                   const variant = product.variants?.[0];
                   const productHref = createProductHref(product, variant?.label);
@@ -942,13 +1067,13 @@ export default function CartPage() {
                   return (
                     <div
                       key={product.id}
-                      className="w-[230px] shrink-0 snap-start overflow-hidden rounded-[0.75rem] border border-outline-variant/20 bg-white p-3 shadow-[0_16px_45px_rgba(21,66,18,0.05)] transition-all hover:-translate-y-0.5 hover:shadow-[0_20px_55px_rgba(21,66,18,0.1)] sm:w-auto sm:p-4"
+                      className="w-[170px] shrink-0 snap-start overflow-hidden rounded-[0.75rem] border border-outline-variant/20 bg-white p-2.5 shadow-[0_16px_45px_rgba(21,66,18,0.05)] transition-all hover:-translate-y-0.5 hover:shadow-[0_20px_55px_rgba(21,66,18,0.1)] sm:w-auto sm:p-4"
                     >
                       <Link
                         href={productHref}
                         className="block overflow-hidden rounded-[0.75rem] bg-surface-container-low"
                       >
-                        <div className="relative aspect-[4/2.85] sm:aspect-[4/3.3]">
+                        <div className="relative aspect-square sm:aspect-[4/3.3]">
                           <img
                             src={imageSources[0] || product.image || "/placeholder-product.png"}
                             alt={product.name}
@@ -964,22 +1089,22 @@ export default function CartPage() {
                       </Link>
 
                       <div className="mt-3 sm:mt-4">
-                        <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-on-surface-variant/55">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-on-surface-variant/55 sm:text-[11px] sm:tracking-[0.22em]">
                           {product.category || product.collection || "Recommended"}
                         </p>
                         <Link href={productHref} className="mt-1 block">
-                          <h3 className="font-headline line-clamp-2 min-h-[2.9rem] text-lg font-semibold tracking-[-0.02em] text-primary sm:min-h-[3.4rem] sm:text-[1.55rem] sm:font-bold">
+                          <h3 className="font-headline line-clamp-2 min-h-[2.5rem] text-[1.05rem] font-semibold leading-tight tracking-[-0.02em] text-primary sm:min-h-[3.1rem] sm:text-[1.35rem] sm:font-bold">
                             {product.name}
                           </h3>
                         </Link>
 
-                        <div className="mt-2.5 flex flex-wrap items-end gap-2">
-                          <span className="text-base font-bold text-primary sm:text-lg">
+                        <div className="mt-2 flex flex-wrap items-end gap-1.5 sm:gap-2">
+                          <span className="text-[1rem] font-bold text-primary sm:text-lg">
                             {currencySymbol}
                             {displayPrice.toLocaleString()}
                           </span>
                           {typeof displayOriginal === "number" && displayOriginal > displayPrice ? (
-                            <span className="text-xs font-medium text-on-surface-variant/50 line-through sm:text-sm">
+                            <span className="text-[11px] font-medium text-on-surface-variant/50 line-through sm:text-sm">
                               {currencySymbol}
                               {displayOriginal.toLocaleString()}
                             </span>
@@ -1008,7 +1133,7 @@ export default function CartPage() {
                             }
                           }}
                           disabled={isRecommendationPending}
-                          className={`mt-4 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-full px-4 text-sm font-semibold transition-all sm:mt-5 sm:min-h-11 ${
+                          className={`mt-3 inline-flex min-h-9 w-full items-center justify-center gap-2 rounded-full px-3 text-[12px] font-semibold transition-all sm:mt-5 sm:min-h-11 sm:px-4 sm:text-sm ${
                             isRecommendationPending
                               ? "cursor-wait bg-primary/85 text-white shadow-lg shadow-primary/15"
                               : "bg-primary text-white hover:bg-primary-container hover:shadow-lg hover:shadow-primary/20"
@@ -1126,9 +1251,6 @@ export default function CartPage() {
             <p className="font-headline truncate text-3xl font-bold tracking-[-0.03em] text-primary">
               {currencySymbol}
               {Math.round(animatedTotal).toLocaleString()}
-            </p>
-            <p className="text-xs text-on-surface-variant/70">
-              {Math.round(animatedItemCount)} {itemCount === 1 ? "item" : "items"} ready for checkout
             </p>
           </div>
 
