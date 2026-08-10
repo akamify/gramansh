@@ -4,7 +4,6 @@ import Script from "next/script";
 import "./globals.css";
 import ClientWrapper from "./components/ClientWrapper";
 import MetaPixel from "./components/MetaPixel";
-import MaterialSymbolsLoader from "./components/MaterialSymbolsLoader";
 import { Providers } from "./context/providers";
 
 const manrope = Manrope({ subsets: ["latin"], variable: "--font-body", display: "swap" });
@@ -35,6 +34,10 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block"
+        />
         <link rel="icon" href="/gramansh.png"/>
       </head>
       <body
@@ -64,7 +67,6 @@ export default function RootLayout({
           />
         </noscript>
         <MetaPixel />
-        <MaterialSymbolsLoader />
         <Providers>
           <ClientWrapper>{children}</ClientWrapper>
         </Providers>
