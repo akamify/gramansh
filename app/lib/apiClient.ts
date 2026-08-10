@@ -826,8 +826,8 @@ export async function fetchUserAddresses(): Promise<UserAddress[]> {
     return rows.map((entry) => mapAddress(asRecord(entry)));
 }
 
-export async function createUserAddress(payload: UserAddressInput): Promise<UserAddress> {
-    const email = getUserEmail();
+export async function createUserAddress(payload: UserAddressInput, emailOverride?: string): Promise<UserAddress> {
+    const email = emailOverride || getUserEmail();
     if (!email) throw new Error('Not authenticated');
     const data = await request('/user/create-newAddress', {
         method: 'POST',
@@ -851,8 +851,9 @@ export async function createBackendOrder(
     address_id?: number,
     promo_code?: string,
     payment_method?: 'Razorpay' | 'COD',
+    emailOverride?: string,
 ) {
-    const email = getUserEmail();
+    const email = emailOverride || getUserEmail();
     const cart_id = getCartId();
     return request('/user/create-order', {
         method: 'POST',

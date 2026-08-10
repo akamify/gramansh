@@ -28,13 +28,13 @@ function Field({
 }) {
     return (
         <label className="flex flex-col gap-2">
-            <span className="font-headline text-xs opacity-70">{label}</span>
+            <span className="font-headline text-xs text-[#52604f]">{label}</span>
             <input
                 type={type}
                 value={value}
                 placeholder={placeholder}
                 onChange={(event) => onChange(event.target.value)}
-                className="bg-surface border border-outline-variant/30 rounded-xl px-4 py-3 font-headline text-sm focus:outline-none focus:border-primary"
+                className="rounded-2xl border border-outline-variant/25 bg-white px-4 py-3.5 font-body text-base text-on-surface shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] outline-none transition placeholder:text-[#70796d] focus:border-primary focus:ring-4 focus:ring-primary/10 sm:text-sm"
             />
         </label>
     );
@@ -131,7 +131,7 @@ export default function AddressForm({
     }, [onChange, value.pinCode]);
 
     return (
-        <div className="bg-white border border-outline-variant/20 rounded-2xl p-5 md:p-6">
+        <div className="rounded-[1.75rem] border border-outline-variant/20 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,245,236,0.96))] p-5 shadow-[0_20px_60px_rgba(21,66,18,0.06)] md:p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Field label="Full Name" value={value.FullName} onChange={(next) => setField('FullName', next)} />
                 <Field label="Phone" value={value.phone1} onChange={(next) => setField('phone1', next)} />
@@ -152,11 +152,11 @@ export default function AddressForm({
                     />
                 </div>
                 <label className="flex flex-col gap-2">
-                    <span className="font-headline text-xs opacity-70">Address Type</span>
+                    <span className="font-headline text-xs text-[#52604f]">Address Type</span>
                     <select
                         value={value.addressType}
                         onChange={(event) => setField('addressType', event.target.value)}
-                        className="bg-surface border border-outline-variant/30 rounded-xl px-4 py-3 font-headline text-sm focus:outline-none focus:border-primary"
+                        className="rounded-2xl border border-outline-variant/25 bg-white px-4 py-3.5 font-body text-base text-on-surface shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/10 sm:text-sm"
                     >
                         <option value="Home">Home</option>
                         <option value="Office">Office</option>

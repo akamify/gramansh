@@ -45,7 +45,7 @@ export default function CheckoutEmailOtpModal({
       }}
     >
       <div
-        className="w-full max-w-md animate-[fadeIn_180ms_ease-out] rounded-[2rem] border border-white/20 bg-white p-6 shadow-2xl"
+        className="w-full max-w-md animate-[fadeIn_180ms_ease-out] rounded-[2rem] border border-white/40 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,245,236,0.98))] p-5 shadow-2xl sm:p-6"
         onMouseDown={(event) => event.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4">
@@ -79,9 +79,9 @@ export default function CheckoutEmailOtpModal({
             inputMode="numeric"
             value={otp}
             maxLength={6}
-            placeholder="••••••"
+            placeholder="000000"
             onChange={(event) => onOtpChange(event.target.value.replace(/\D/g, '').slice(0, 6))}
-            className="w-full rounded-2xl border border-outline-variant/30 bg-surface-variant/20 px-5 py-4 text-center text-2xl font-black tracking-[0.8em] text-primary outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15"
+            className="w-full rounded-2xl border border-outline-variant/25 bg-white px-5 py-4 text-center text-2xl font-black tracking-[0.45em] text-primary outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/15"
           />
           {error ? (
             <p className="mt-3 rounded-xl border border-error/20 bg-error/10 px-3 py-2 text-center text-xs text-error">
