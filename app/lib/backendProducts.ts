@@ -138,8 +138,8 @@ function buildStockMaps(raw: GenericRecord) {
         const row = asRecord(variant);
         const label = normalizeToken(row.label);
         const stock = Math.max(0, Number(row.stock || 0));
-        const price = Number(row.price || row.selling_price || 0);
-        const originalPrice = Number(row.originalPrice || row.original_price || 0) || undefined;
+        const price = Number(row.selling_price ?? row.price ?? 0);
+        const originalPrice = Number(row.originalPrice ?? row.original_price ?? row.price ?? 0) || undefined;
         const imagesArray = (row as unknown as { images?: unknown }).images;
         const normalizedImages = Array.isArray(imagesArray)
             ? imagesArray

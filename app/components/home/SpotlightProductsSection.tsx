@@ -218,18 +218,19 @@ export default function SpotlightProductsSection({
 
                     <div className="mt-auto flex items-end justify-between gap-3">
                       <div>
-                        <div className="text-lg font-black text-[#24461e]">
-                          {formatMoney(currencySymbol, displayPrice)}
+                        <div className="flex items-baseline gap-2">
+                          <div className="text-lg font-black text-[#24461e]">
+                            {formatMoney(currencySymbol, displayPrice)}
+                          </div>
+                          {displayOriginal && displayOriginal > displayPrice ? (
+                            <div className="text-xs font-medium text-[#ad8f71] line-through">
+                              {formatMoney(currencySymbol, displayOriginal)}
+                            </div>
+                          ) : null}
                         </div>
-                        {displayOriginal && displayOriginal > displayPrice ? (
-                          <div className="text-xs font-medium text-[#ad8f71] line-through">
-                            {formatMoney(currencySymbol, displayOriginal)}
-                          </div>
-                        ) : (
-                          <div className="text-xs font-medium text-[#8c5f22]">
-                            Gram Ansh quality pick
-                          </div>
-                        )}
+                        <div className="text-xs font-medium text-[#8c5f22]">
+                          Gram Ansh quality pick
+                        </div>
                       </div>
 
                       <button

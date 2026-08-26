@@ -301,7 +301,7 @@ export default function ShopPageClient() {
                             ₹{variant.price}
                           </span>
 
-                          {variant.originalPrice && (
+                          {variant.originalPrice && variant.originalPrice > variant.price && (
                             <span className="pb-1 text-sm font-bold text-on-surface-variant/45 line-through">
                               ₹{variant.originalPrice}
                             </span>

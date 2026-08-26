@@ -1,10 +1,10 @@
 import type { PublicHomepageData } from "@/app/lib/publicDataClient";
 
-export const HOMEPAGE_PUBLIC_CACHE_KEY = "gramansh_homepage_public_cache_v1";
-export const HOMEPAGE_RECOVERY_KEY = "gramansh_homepage_recovery_attempted_v1";
-export const HOMEPAGE_SOFT_REFETCH_KEY = "gramansh_homepage_soft_refetch_done_v1";
+export const HOMEPAGE_PUBLIC_CACHE_KEY = "gramansh_homepage_public_cache_v2";
+export const HOMEPAGE_RECOVERY_KEY = "gramansh_homepage_recovery_attempted_v2";
+export const HOMEPAGE_SOFT_REFETCH_KEY = "gramansh_homepage_soft_refetch_done_v2";
 
-const CACHE_VERSION = 1;
+const CACHE_VERSION = 2;
 const FRESH_TTL_MS = 10 * 60 * 1000;
 const STALE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 

@@ -372,7 +372,7 @@ export default function SearchPage() {
                                   Rs {variant.price}
                                 </span>
 
-                                {variant.originalPrice && (
+                                {variant.originalPrice && variant.originalPrice > variant.price && (
                                   <span className="text-[10px] sm:text-xs text-on-surface-variant line-through opacity-40 italic">
                                     Rs {variant.originalPrice}
                                   </span>

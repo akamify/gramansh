@@ -203,16 +203,18 @@ function ProductCard({
           </h3>
 
           <div className="flex shrink-0 flex-col items-end">
-            <span className="text-lg font-black text-[#24461e]">
-              {currency}
-              {price}
-            </span>
-            {isSale ? (
-              <span className="text-xs text-[#a78c70] line-through">
+            <div className="flex items-baseline gap-2">
+              <span className="text-lg font-black text-[#24461e]">
                 {currency}
-                {oldPrice}
+                {price}
               </span>
-            ) : null}
+              {isSale ? (
+                <span className="text-xs text-[#a78c70] line-through">
+                  {currency}
+                  {oldPrice}
+                </span>
+              ) : null}
+            </div>
           </div>
         </div>
 

@@ -649,6 +649,22 @@ export default function CheckoutPage() {
         : paymentMethod === "COD"
           ? "Place Cash on Delivery order"
           : `Pay ${currencySymbol}${total.toFixed(2)}`;
+  const paymentButtonIcon = isProcessing
+    ? "progress_activity"
+    : needsGuestOtpVerification
+      ? "mark_email_unread"
+      : paymentMethod === "COD"
+        ? "shopping_bag"
+        : "lock";
+  const mobilePaymentButtonText = isProcessing
+    ? "Processing..."
+    : isOtpBusy && needsGuestOtpVerification
+      ? "Sending OTP..."
+      : needsGuestOtpVerification
+        ? "Verify email"
+        : paymentMethod === "COD"
+          ? "Place order"
+          : "Pay now";
   const paymentDisabled =
     isProcessing ||
     isOtpBusy ||
@@ -748,7 +764,7 @@ export default function CheckoutPage() {
               <CheckoutAddressSkeleton />
             ) : !isAuthenticated ? (
               <div className="overflow-hidden rounded-[1.75rem] border border-[#e1e8dd] bg-white shadow-[0_16px_50px_rgba(27,67,24,0.06)]">
-                <div className="border-b border-[#edf0e9] bg-[linear-gradient(135deg,#f6fcf4,#eef8eb)] px-5 py-5 sm:px-7">
+                <div className="border-b border-[#edf0e9] bg-[linear-gradient(135deg,#f6fcf4,#eef8eb)] px-4 py-4 sm:px-7 sm:py-5">
                   <div className="flex items-start gap-3">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#dff2da] text-[#23651d]">
                       <span className="material-symbols-outlined">
@@ -766,7 +782,7 @@ export default function CheckoutPage() {
                   </div>
                 </div>
                 <div className="p-4 sm:p-6">
-                  <div className="mb-5 rounded-2xl border border-[#dce9d7] bg-[#fbfef9] p-4">
+                  <div className="mb-4 rounded-2xl border border-[#dce9d7] bg-[#fbfef9] p-4">
                     <label className="block">
                       <span className="mb-2 flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.14em] text-[#557851]">
                         <span className="material-symbols-outlined text-base">
@@ -828,7 +844,7 @@ export default function CheckoutPage() {
               <CheckoutAddressSkeleton />
             ) : (
               <div className="overflow-hidden rounded-[1.75rem] border border-[#e1e8dd] bg-white shadow-[0_16px_50px_rgba(27,67,24,0.06)]">
-                <div className="flex flex-col gap-4 border-b border-[#edf0e9] bg-[linear-gradient(135deg,#f7fcf5,#edf8e9)] px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-7">
+                <div className="flex flex-col gap-4 border-b border-[#edf0e9] bg-[linear-gradient(135deg,#f7fcf5,#edf8e9)] px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7 sm:py-5">
                   <div className="flex items-start gap-3">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#ddf1d8] text-[#23651d]">
                       <span className="material-symbols-outlined">
@@ -960,7 +976,7 @@ export default function CheckoutPage() {
               <CheckoutSummarySkeleton />
             ) : (
               <div className="overflow-hidden rounded-[1.75rem] border border-[#dce7d8] bg-white shadow-[0_20px_60px_rgba(27,67,24,0.10)]">
-                <div className="flex items-center justify-between gap-3 border-b border-[#ebf0e8] bg-[#fbfdf9] px-5 py-5 sm:px-6">
+                <div className="flex items-center justify-between gap-3 border-b border-[#ebf0e8] bg-[#fbfdf9] px-4 py-4 sm:px-6 sm:py-5">
                   <div>
                     <h2 className="font-headline text-xl font-black text-[#173f19]">
                       Order summary
@@ -1029,7 +1045,7 @@ export default function CheckoutPage() {
                     );
                   })}
                 </div>
-                <div className="border-t border-[#edf0e9] px-5 py-5 sm:px-6">
+                <div className="border-t border-[#edf0e9] px-4 py-4 sm:px-6 sm:py-5">
                   <p className="mb-3 text-[11px] font-extrabold uppercase tracking-[0.16em] text-[#71846e]">
                     Select payment method
                   </p>
@@ -1141,15 +1157,7 @@ export default function CheckoutPage() {
                     disabled={paymentDisabled}
                     className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#1d641a] px-4 py-4 font-headline text-base font-black text-white shadow-[0_14px_28px_rgba(30,100,26,0.24)] transition hover:-translate-y-0.5 hover:bg-[#174f15] disabled:cursor-not-allowed disabled:opacity-55 disabled:hover:translate-y-0"
                   >
-                    <span className="material-symbols-outlined">
-                      {isProcessing
-                        ? "progress_activity"
-                        : needsGuestOtpVerification
-                          ? "mark_email_unread"
-                          : paymentMethod === "COD"
-                            ? "shopping_bag"
-                            : "lock"}
-                    </span>
+                    <span className="material-symbols-outlined">{paymentButtonIcon}</span>
                     {paymentButtonText}
                   </button>
                   <div className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs text-[#748171]">
@@ -1162,7 +1170,7 @@ export default function CheckoutPage() {
                         : "Your address and payment information are secure."
                       : paymentMethod === "COD"
                         ? "You will pay when your order is delivered."
-                        : "Payments are securely processed by Razorpay."}
+                        : "Secure prepaid checkout."}
                   </div>
                   {hasStockConflict ? (
                     <p className="mt-3 rounded-xl bg-red-50 px-3 py-2.5 text-center text-sm font-medium text-red-600">
@@ -1198,16 +1206,8 @@ export default function CheckoutPage() {
               disabled={paymentDisabled}
               className="flex min-h-[50px] items-center justify-center gap-2 rounded-xl bg-[#1d641a] px-5 text-sm font-black text-white shadow-lg shadow-[#1d641a]/20 disabled:opacity-55"
             >
-              <span className="material-symbols-outlined text-lg">
-                {isProcessing ? "progress_activity" : needsGuestOtpVerification ? "mark_email_unread" : "lock"}
-              </span>
-              {isProcessing
-                ? "Processing..."
-                : needsGuestOtpVerification
-                  ? "Verify email"
-                  : paymentMethod === "COD"
-                    ? "Place order"
-                  : "Pay now"}
+              <span className="material-symbols-outlined text-lg">{paymentButtonIcon}</span>
+              {mobilePaymentButtonText}
             </button>
           </div>
         </div>
