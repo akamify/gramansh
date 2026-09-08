@@ -9,6 +9,7 @@ const HERITAGE_POINTS = [
   "Traditional kitchen values",
 ];
 
+
 const HERITAGE_STATS = [
   { stat: "16:9", label: "Wider visual story" },
   { stat: "Pure", label: "Ingredient-led quality" },
