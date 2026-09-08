@@ -33,6 +33,7 @@ declare global {
   }
 }
 
+
 const SHIPPING = 0;
 const SELECTED_ADDRESS_STORAGE_KEY = "checkout:selected-address-id";
 const checkoutItemKey = (id: number, size: string) =>
