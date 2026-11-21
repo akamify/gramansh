@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Manrope, Newsreader } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
@@ -66,7 +67,20 @@ export default function RootLayout({
             style={{ display: "none", visibility: "hidden" }}
           />
         </noscript>
-        <MetaPixel />
+        {/* Keep the no-JavaScript fallback outside the client Suspense boundary. */}
+        <noscript>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            height="1"
+            width="1"
+            style={{ display: "none" }}
+            src="https://www.facebook.com/tr?id=996611950188434&ev=PageView&noscript=1"
+            alt=""
+          />
+        </noscript>
+        <Suspense fallback={null}>
+          <MetaPixel />
+        </Suspense>
         <Providers>
           <ClientWrapper>{children}</ClientWrapper>
         </Providers>
